@@ -1,0 +1,12 @@
+from building import *
+
+cwd     = GetCurrentDir()
+
+src     = Glob('src/*.c')
+path    = [cwd + '/inc']
+
+defines = ['CJSON_SPRINTF_FLOAT']
+
+group = DefineGroup('eziot_components', src, depend = ['EZIOT_COMPONENT_CJSON_ENABLE'], CPPPATH = path, CPPDEFINES = defines)
+
+Return('group')
