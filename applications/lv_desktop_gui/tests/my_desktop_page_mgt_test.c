@@ -232,37 +232,31 @@ void lv_desktop_gui_page_update()
 	
 	if(page_manager)
 	{
-//		if(!lv_100ask_page_manager_get_current_page(page_manager,"deskmainpage"))
-//		{
-//				update_top_status_bar(p);
-//		}
+		if(!lv_100ask_page_manager_get_current_page(page_manager,"deskmainpage"))
+		{
+				update_top_status_bar(p);
+		}
 		if(lv_100ask_page_manager_get_current_page(page_manager,"deskmainpage"))
 		{
-//			rt_kprintf("desktop page\n");
 			desktopmainpage_update();
-
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"clockscr"))
 		{
-//			rt_kprintf("clock page\n");
 			if(p)
-			{
-				//rt_snprintf(clocktime,10,"%02d:%02d",p->tm_hour,p->tm_min);
-				
-//				lv_my_calendar_set_date(p->tm_year+1900, p->tm_mon+1, p->tm_mday);
+			{				
+				lv_my_calendar_set_date(p->tm_year+1900, p->tm_mon+1, p->tm_mday);
 				lv_clock_label_update(p->tm_hour,p->tm_min,p->tm_sec);		
 			}
-			update_top_status_bar(p);
-
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"imgscr"))
 		{
-			update_top_status_bar(p);
-//			rt_kprintf("img page\n");
+			if(p->tm_sec%30==0)
+			{
+				lv_albumpage_auto_update();
+			}
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"newsscr"))
 		{
-//			rt_kprintf("news page\n");
 			if( p->tm_hour >7 && p->tm_hour < 23 && p->tm_min!=0 &&  p->tm_min %50==0 && p->tm_sec!=0 && p->tm_sec%50==0)
 			{
 				news_str_update();
@@ -271,25 +265,16 @@ void lv_desktop_gui_page_update()
 			{
 				news_show_update();
 			}
-			update_top_status_bar(p);
-
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"game2048"))
 		{
-//			rt_kprintf("game2048 page\n");
-			update_top_status_bar(p);
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"weatherscr"))
 		{
-//			rt_kprintf("weather page\n");
-			update_top_status_bar(p);
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"settingscr"))
 		{
-//			rt_kprintf("setting page\n");
-			update_top_status_bar(p);
 		}
-		
 	}
 }
 

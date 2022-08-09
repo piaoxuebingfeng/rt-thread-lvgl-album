@@ -464,22 +464,6 @@ void lv_my_calendar_set_date(uint32_t year,uint32_t month,uint32_t day)
 						rt_memset(nonglistr,0,20*sizeof(char));
             rt_sprintf(nonglistr,"%s月%s",ChMonth[lunar.month],ChDay[lunar.day]);
 					}
-					
-//        if (LunarCalendar(year,month,day))
-//        {
-//						rt_memset(nonglistr,0,20*sizeof(char));
-//            rt_sprintf(nonglistr,"%s月%s (闰)",ChMonth[(LunarCalendarDay & 0x3C0) >> 6],ChDay[LunarCalendarDay & 0x3F]);
-//        }
-//        else
-//        {
-//						rt_memset(nonglistr,0,20*sizeof(char));
-//						rt_kprintf("LunarCalendarDay  %d\n",LunarCalendarDay);
-//						rt_kprintf("(LunarCalendarDay & 0x3C0) >> 6 %d\n",(LunarCalendarDay & 0x3C0) >> 6);
-//						rt_kprintf("LunarCalendarDay & 0x3F %d\n",LunarCalendarDay & 0x3F);
-//						
-//            rt_sprintf(nonglistr,"%s月%s",ChMonth[(LunarCalendarDay & 0x3C0) >> 6],ChDay[LunarCalendarDay & 0x3F]);
-//        }
-				rt_kprintf("update calendar : %s \n",nonglistr);
 				lv_label_set_text(nongli_label,nonglistr);
     }
 }

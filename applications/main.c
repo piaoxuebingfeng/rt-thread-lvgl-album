@@ -34,7 +34,7 @@
 
 #include"my_desktop_page_mgt_test.h"
 #include "newspageui.h"
-
+#include "albumpageui.h"
 
 #include "guiconf.h"  
 
@@ -54,11 +54,6 @@
 int lv_gui_update(const char *news_uri);
 
 
-//---------------------------------------------------------------------------------------------------------
-void imgs_list_init();
-void imgs_list_deinit();
-void imgs_list_show();
-//---------------------------------------------------------------------------------------------------------
 
 
 /* defined the LED1 pin: PG6 */
@@ -142,7 +137,8 @@ int main(void)
 		
 		// just test
 		imgs_list_init();
-		imgs_list_show();
+		imgs_set_current_img_node_head();
+//		imgs_list_show();
     while (1)
     {
         rt_pin_write(LED1_PIN, PIN_HIGH);
@@ -265,204 +261,6 @@ int lv_gui_update(const char *news_uri)
 }
 
 
-//---------------------------------------------------------------------------------------------------------
-
-typedef struct imgs_mgt_s imgs_mgt_t;
-
-
-struct imgs_mgt_s
-{
-	int imgs_count;
-	int imgs_total_nums;
-	char *imgs_path;
-	char *imgs_lvgl_path;
-	
-	imgs_mgt_t *next;
-};
-
-imgs_mgt_t *imgs_list_head = RT_NULL;
-
-
-
-
-
-// 读取 SD 卡中图片信息，整理成一个列表，提供给 img page 后续使用
-void imgs_list_init()
-{
-	imgs_mgt_t *imgs_list_p = RT_NULL;	
-	imgs_mgt_t *imgs_list_q = RT_NULL;	
-	DIR *dirp;
-	struct dirent *d;
-	int imgs_count =0;
-	int imgs_total_nums =0;
-	int len=0;
-	
-
-	/* 打开 / dir_test 目录 */
-	dirp = opendir("/imgs");
-	if (dirp == RT_NULL)
-	{
-			rt_kprintf("open directory error!\n");
-	}
-	else
-	{
-			
-			/* 读取目录 */
-			while ((d = readdir(dirp)) != RT_NULL)
-			{
-				//rt_kprintf("found %s\n", d->d_name);
-				imgs_total_nums++;
-			}
-			/* 关闭目录 */
-			closedir(dirp);
-	}
-	
-	rt_kprintf("img total nums :%d\n",imgs_total_nums);
-	
-	/* 打开 / dir_test 目录 */
-	dirp = opendir("/imgs");
-	if (dirp == RT_NULL)
-	{
-			rt_kprintf("open directory error!\n");
-	}
-	else
-	{
-			
-			/* 读取目录 */
-			while ((d = readdir(dirp)) != RT_NULL)
-			{
-				len = rt_strlen(d->d_name);
-				imgs_list_p = (imgs_mgt_t *)rt_malloc(sizeof(imgs_mgt_t));
-				if(imgs_list_p== RT_NULL)
-				{
-					rt_kprintf("imgs_list_p malloc fail\n");
-					goto __exit ;
-				}
-				// 插入图片名称
-				imgs_list_p->imgs_path = (char *)rt_malloc(sizeof(char)*len+10);
-				if(imgs_list_p->imgs_path== RT_NULL)
-				{
-					rt_kprintf("imgs_path malloc fail\n");
-					goto __exit ;
-				}
-				imgs_list_p->imgs_lvgl_path = (char *)rt_malloc(sizeof(char)*len+10);
-				if(imgs_list_p->imgs_lvgl_path== RT_NULL)
-				{
-					rt_kprintf("imgs_lvgl_path malloc fail\n");
-					goto __exit ;
-				}			
-				
-				rt_sprintf(imgs_list_p->imgs_path,"/imgs/%s",d->d_name);
-				rt_sprintf(imgs_list_p->imgs_lvgl_path,"S:imgs/%s",d->d_name);
-				imgs_count++;
-				imgs_list_p->imgs_count      =  imgs_count;
-				imgs_list_p->imgs_total_nums =  imgs_total_nums;
-				imgs_list_p->next = RT_NULL;
-				rt_kprintf("[%d/%d] %s  \n",imgs_list_p->imgs_count,imgs_list_p->imgs_total_nums,imgs_list_p->imgs_path );
-
-				// 向链表中新增节点
-				if(imgs_list_head == RT_NULL)
-				{
-					imgs_list_head = imgs_list_p;
-					imgs_list_q = imgs_list_head;
-				}
-				else
-				{
-					while(imgs_list_q->next!=RT_NULL)
-					{
-						imgs_list_q = imgs_list_q->next;
-					}
-					imgs_list_q->next = imgs_list_p;
-				}
-			}
-			/* 关闭目录 */
-			closedir(dirp);
-			return ;
-	}
-	
-	
-__exit:
-	imgs_list_deinit();
-	if(dirp)
-	{
-		closedir(dirp);
-	}
-}
-
-
-void imgs_list_show()
-{
-	imgs_mgt_t *imgs_list_p = imgs_list_head;
-	imgs_mgt_t *imgs_list_q= imgs_list_p;
-	
-	if(imgs_list_q != RT_NULL)
-	{
-		//while(imgs_list_q  && imgs_list_q->next!=RT_NULL)
-		while(imgs_list_q)
-		{
-			rt_kprintf("[%d/%d]   %s  \n",imgs_list_q->imgs_count,imgs_list_q->imgs_total_nums,imgs_list_q->imgs_lvgl_path);
-			imgs_list_q = imgs_list_q->next;
-		}
-	}
-}
-
-
-
-void imgs_list_deinit()
-{
-	imgs_mgt_t *imgs_list_p = imgs_list_head;
-	imgs_mgt_t *imgs_list_q= RT_NULL;
-	
-	if(imgs_list_p != RT_NULL)
-	{
-		while(imgs_list_p)
-		{
-			imgs_list_q = imgs_list_p->next;
-			if(imgs_list_p->imgs_path)
-			{
-				rt_free(imgs_list_p->imgs_path);
-			}
-			if(imgs_list_p->imgs_lvgl_path)
-			{
-				rt_free(imgs_list_p->imgs_lvgl_path);
-			}
-			rt_free(imgs_list_p);	
-			imgs_list_p = imgs_list_q;
-		}
-		imgs_list_head = RT_NULL;
-	}
-}
-
-
-
-
-// read imgs name 
-
-static void readimgsdir_sample(void)
-{
-    DIR *dirp;
-    struct dirent *d;
-
-    /* 打开 / dir_test 目录 */
-    dirp = opendir("/imgs");
-    if (dirp == RT_NULL)
-    {
-        rt_kprintf("open directory error!\n");
-    }
-    else
-    {
-        /* 读取目录 */
-        while ((d = readdir(dirp)) != RT_NULL)
-        {
-            rt_kprintf("found %s\n", d->d_name);
-        }
-
-        /* 关闭目录 */
-        closedir(dirp);
-    }
-}
-/* 导出到 msh 命令列表中 */
-MSH_CMD_EXPORT(readimgsdir_sample, readdir imgs dir sample);
 
 
 

@@ -17,6 +17,10 @@ extern "C" {
 //#endif
 #include <lvgl.h>
 
+#include "dfs.h"
+#include "fcntl.h"
+#include "unistd.h"
+
 //extern lv_obj_t * ui_albumpage;
 //extern lv_obj_t * ui_Image1;
 //extern lv_obj_t * ui_Image2;
@@ -37,6 +41,14 @@ LV_IMG_DECLARE(ui_img_seaandsky800_png);    // assets\seaandsky800.png
 
 void ui_init(void);
 void ui_albumpage_screen_init(lv_obj_t *parent);
+
+
+void imgs_list_init();
+void imgs_set_current_img_node_head();
+void lv_albumpage_auto_update();
+void imgs_list_deinit();
+void imgs_list_show();
+
 
 #ifdef __cplusplus
 } /*extern "C"*/

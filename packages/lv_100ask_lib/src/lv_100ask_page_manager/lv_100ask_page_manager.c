@@ -50,17 +50,13 @@ static lv_obj_t * get_page(lv_obj_t * page_manager, char *name);
 
 
 // top status bar
-static lv_obj_t *top_status_bar_panel;
-static lv_obj_t *top_status_wifi_label;
-static lv_obj_t *top_status_sdcard_label;
-static lv_obj_t *top_status_time_label;
-static lv_obj_t *top_status_location_label;
+lv_obj_t *top_status_bar_panel;
+lv_obj_t *top_status_wifi_label;
+lv_obj_t *top_status_sdcard_label;
+lv_obj_t *top_status_time_label;
+lv_obj_t *top_status_location_label;
 
 static void lv_page_top_status_bar_create(lv_obj_t *parent);
-
-void lv_page_top_status_set_wifi_label(char connect_status);
-void lv_page_top_status_set_sdcard_label(char sdcard_status);
-void lv_page_top_status_set_time_label(const char *curr_time);
 
 
 
@@ -475,12 +471,12 @@ static void lv_page_top_status_bar_create(lv_obj_t *parent)
     lv_obj_set_style_border_width(top_status_bar_panel,0,LV_STATE_DEFAULT);
     lv_obj_align(top_status_bar_panel,LV_ALIGN_TOP_MID,0,0);
 
-    lv_obj_t *top_status_wifi_label  = lv_label_create(top_status_bar_panel);
+    top_status_wifi_label  = lv_label_create(top_status_bar_panel);
     lv_obj_align(top_status_wifi_label, LV_ALIGN_RIGHT_MID, 0, 0);
     lv_label_set_text(top_status_wifi_label,LV_SYMBOL_WIFI);
     lv_obj_set_style_text_color(top_status_wifi_label,lv_color_make(255,0,0),LV_STATE_DEFAULT);
 
-    lv_obj_t *top_status_sdcard_label  = lv_label_create(top_status_bar_panel);
+    top_status_sdcard_label  = lv_label_create(top_status_bar_panel);
     lv_obj_align(top_status_sdcard_label, LV_ALIGN_RIGHT_MID,-32, 0);
     lv_label_set_text(top_status_sdcard_label,LV_SYMBOL_SD_CARD);
     lv_obj_set_style_text_color(top_status_sdcard_label,lv_color_make(255,0,255),LV_STATE_DEFAULT);
@@ -505,7 +501,7 @@ static void lv_page_top_status_bar_create(lv_obj_t *parent)
 }
 
 
-void lv_page_top_status_set_wifi_label(char connect_status)
+void lv_page_top_status_set_wifi_label(uint8_t connect_status)
 {
     if(top_status_wifi_label)
     {

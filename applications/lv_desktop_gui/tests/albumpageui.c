@@ -5,11 +5,34 @@
 #define VSCODE_SIMULATOR     1
 
 
+//---------------------------------------------------------------------------------------------------------
+
+
+typedef struct imgs_mgt_s imgs_mgt_t;
+
+struct imgs_mgt_s
+{
+	int imgs_count;
+	int imgs_total_nums;
+	char *imgs_path;
+	char *imgs_lvgl_path;
+	
+	imgs_mgt_t *next;
+};
+
+imgs_mgt_t *imgs_list_head = RT_NULL;
+static imgs_mgt_t *imgs_current_show = RT_NULL;
+static uint32_t img_show_count =1;
+
+void imgs_list_init();
+void imgs_list_deinit();
+void imgs_list_show();
+//---------------------------------------------------------------------------------------------------------
+
+
 ///////////////////// VARIABLES ////////////////////
 static lv_obj_t * ui_albumpage;
 static lv_obj_t * ui_Image1;
-static lv_obj_t * ui_Image2;
-static lv_obj_t * ui_Image3;
 static lv_obj_t * ui_bottompanel;
 static lv_obj_t * ui_btnleft;
 static lv_obj_t * ui_Labbtnleft;
@@ -35,320 +58,28 @@ const static void *norflashimgname[]={&bg_lvgl,&ui_img_testbg_png,&ui_img_seaand
      #error "#error LV_COLOR_16_SWAP should be 0 to match SquareLine Studio's settings"
  #endif
 
-///////////////////// ANIMATIONS ////////////////////
-
-// ui_EloAnimation0
-// FUNCTION HEADER
-static void albumshowleft_Animation(lv_obj_t * TargetObject, int delay);
-
-
-static int32_t _ui_anim_callback_get_opacity(lv_anim_t * a)
-{
-    return lv_obj_get_style_opa((lv_obj_t *)a->user_data, 0);
-}
-
-static void _ui_anim_callback_set_opacity(lv_anim_t * a, int32_t v)
-{
-    lv_obj_set_style_opa((lv_obj_t *)a->user_data, v, 0);
-}
-
-static int32_t _ui_anim_callback_get_x(lv_anim_t * a)
-{
-    return lv_obj_get_x_aligned((lv_obj_t *)a->user_data);
-}
-
-static void _ui_anim_callback_set_x(lv_anim_t * a, int32_t v)
-{
-    lv_obj_set_x((lv_obj_t *)a->user_data, v);
-}
-
-
-// FUNCTION
-void albumshowleft_Animation(lv_obj_t * TargetObject, int delay)
-{
-
-    //
-    lv_anim_t PropertyAnimation_0;
-    lv_anim_init(&PropertyAnimation_0);
-    lv_anim_set_time(&PropertyAnimation_0, 2000);
-    lv_anim_set_user_data(&PropertyAnimation_0, TargetObject);
-    lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_opacity);
-    lv_anim_set_values(&PropertyAnimation_0, 255, 0);
-    lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_ease_in);
-    lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
-    lv_anim_set_early_apply(&PropertyAnimation_0, false);
-    lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_opacity);
-    lv_anim_start(&PropertyAnimation_0);
-
-}
-
-// ui_EloAnimation0
-// FUNCTION HEADER
-void imgxmoveanmi_Animation(lv_obj_t * TargetObject, int delay);
-
-// FUNCTION
-void imgxmoveanmi_Animation(lv_obj_t * TargetObject, int delay)
-{
-
-    //
-    lv_anim_t PropertyAnimation_0;
-    lv_anim_init(&PropertyAnimation_0);
-    lv_anim_set_time(&PropertyAnimation_0, 2000);
-    lv_anim_set_user_data(&PropertyAnimation_0, TargetObject);
-    lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_x);
-    lv_anim_set_values(&PropertyAnimation_0, 0, 800);
-    lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_ease_in_out);
-    lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
-    lv_anim_set_early_apply(&PropertyAnimation_0, false);
-    lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_x);
-    lv_anim_start(&PropertyAnimation_0);
-
-}
-
-// ui_EloAnimation0
-// FUNCTION HEADER
-void img2xmoveanmi_Animation(lv_obj_t * TargetObject, int delay);
-
-// FUNCTION
-void img2xmoveanmi_Animation(lv_obj_t * TargetObject, int delay)
-{
-
-    //
-    lv_anim_t PropertyAnimation_0;
-    lv_anim_init(&PropertyAnimation_0);
-    lv_anim_set_time(&PropertyAnimation_0, 2000);
-    lv_anim_set_user_data(&PropertyAnimation_0, TargetObject);
-    lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_x);
-    lv_anim_set_values(&PropertyAnimation_0, 0, 800);
-    lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_ease_in_out);
-    lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
-    lv_anim_set_early_apply(&PropertyAnimation_0, false);
-    lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_x);
-    lv_anim_start(&PropertyAnimation_0);
-
-}
-
-
-
-//void imganmitoleft()
-//{
-//    lv_anim_t anim_left;
-//    lv_anim_init(&anim_left);
-//    lv_anim_t anim_left2;
-//    lv_anim_init(&anim_left2);
-
-//    uint16_t right_img_c = imgswitch_c +1;
-//    if(right_img_c>=5)
-//    {
-//        right_img_c =0;
-//    }
-//    LV_LOG_USER("imgsname[%d]=%s\n",imgswitch_c,imgsname[imgswitch_c]);
-//    LV_LOG_USER("imgsname[%d]=%s\n",right_img_c,imgsname[right_img_c]);
-
-//    lv_obj_set_x(ui_Image1, 0);
-//    lv_obj_set_x(ui_Image2, -800);
-//    lv_obj_set_x(ui_Image3, 800);
-//    lv_img_set_src(ui_Image1, imgsname[imgswitch_c]);
-//    lv_img_set_src(ui_Image3, imgsname[right_img_c]);
-//    imgswitch_c++;
-//    if(imgswitch_c==5)
-//    {
-//        imgswitch_c=0;
-//    }
-
-//    lv_anim_set_time(&anim_left, 2000);
-//    lv_anim_set_user_data(&anim_left, ui_Image1);
-//    lv_anim_set_custom_exec_cb(&anim_left, _ui_anim_callback_set_x);
-//    lv_anim_set_values(&anim_left, 0, -800);
-//    lv_anim_set_path_cb(&anim_left, lv_anim_path_ease_in_out);
-//    lv_anim_set_delay(&anim_left,  0);
-//    lv_anim_set_early_apply(&anim_left, false);
-//    lv_anim_set_get_value_cb(&anim_left, &_ui_anim_callback_get_x);
-//    lv_anim_start(&anim_left);
-
-//    lv_anim_set_time(&anim_left2, 2000);
-//    lv_anim_set_user_data(&anim_left2, ui_Image3);
-//    lv_anim_set_custom_exec_cb(&anim_left2, _ui_anim_callback_set_x);
-//    lv_anim_set_values(&anim_left2, 0, -800);
-//    lv_anim_set_path_cb(&anim_left2, lv_anim_path_ease_in_out);
-//    lv_anim_set_delay(&anim_left2,  0);
-//    lv_anim_set_early_apply(&anim_left2, false);
-//    lv_anim_set_get_value_cb(&anim_left2, &_ui_anim_callback_get_x);
-//    lv_anim_start(&anim_left2);
-
-
-//}
-
-
-//void imganmitoright()
-//{
-//    lv_anim_t anim_right;
-//    lv_anim_init(&anim_right);
-//    lv_anim_t anim_right2;
-//    lv_anim_init(&anim_right2);
-//    uint16_t left_img_c =0;
-
-//    if(imgswitch_c==0)
-//    {
-//        left_img_c = 4;
-//    }
-//    else if(imgswitch_c>0)
-//    {
-//        left_img_c = imgswitch_c -1;
-//    }
-//    if(left_img_c>=5)
-//    {
-//        left_img_c =0;
-//    }
-
-//    LV_LOG_USER("imgsname[%d]=%s\n",imgswitch_c,imgsname[imgswitch_c]);
-//    LV_LOG_USER("imgsname[%d]=%s\n",left_img_c,imgsname[left_img_c]);
-
-//    lv_obj_set_x(ui_Image1, 0);
-//    lv_obj_set_x(ui_Image2, -800);
-//    lv_obj_set_x(ui_Image3, 800);
-//    lv_img_set_src(ui_Image1, imgsname[imgswitch_c]);
-//    lv_img_set_src(ui_Image2, imgsname[left_img_c]);
-//    if(imgswitch_c==0)
-//    {
-//        imgswitch_c =4;
-//    }
-//    else if(imgswitch_c >0)
-//    {
-//        imgswitch_c--;
-//    }
-
-//    lv_anim_set_time(&anim_right, 2000);
-//    lv_anim_set_user_data(&anim_right, ui_Image1);
-//    lv_anim_set_custom_exec_cb(&anim_right, _ui_anim_callback_set_x);
-//    lv_anim_set_values(&anim_right, 0, 800);
-//    lv_anim_set_path_cb(&anim_right, lv_anim_path_ease_in_out);
-//    lv_anim_set_delay(&anim_right,  0);
-//    lv_anim_set_early_apply(&anim_right, false);
-//    lv_anim_set_get_value_cb(&anim_right, &_ui_anim_callback_get_x);
-//    lv_anim_start(&anim_right);
-
-//    lv_anim_set_time(&anim_right2, 2000);
-//    lv_anim_set_user_data(&anim_right2, ui_Image2);
-//    lv_anim_set_custom_exec_cb(&anim_right2, _ui_anim_callback_set_x);
-//    lv_anim_set_values(&anim_right2, 0, 800);
-//    lv_anim_set_path_cb(&anim_right2, lv_anim_path_ease_in_out);
-//    lv_anim_set_delay(&anim_right2,  0);
-//    lv_anim_set_early_apply(&anim_right2, false);
-//    lv_anim_set_get_value_cb(&anim_right2, &_ui_anim_callback_get_x);
-//    lv_anim_start(&anim_right2);
-
-
-//}
-
-
-
 void imganmitoleft()
 {
-    lv_anim_t anim_left;
-    lv_anim_init(&anim_left);
-    lv_anim_t anim_left2;
-    lv_anim_init(&anim_left2);
-
-    uint16_t right_img_c = imgswitch_c +1;
-    if(right_img_c>=3)
-    {
-        right_img_c =0;
-    }
-//    LV_LOG_USER("imgsname[%d]=%s\n",imgswitch_c,imgsname[imgswitch_c]);
-//    LV_LOG_USER("imgsname[%d]=%s\n",right_img_c,imgsname[right_img_c]);
-
-    lv_obj_set_x(ui_Image1, 0);
-    lv_obj_set_x(ui_Image2, -800);
-    lv_obj_set_x(ui_Image3, 800);
-    lv_img_set_src(ui_Image1, norflashimgname[imgswitch_c]);
-    lv_img_set_src(ui_Image3, norflashimgname[right_img_c]);
     imgswitch_c++;
-    if(imgswitch_c==3)
+    if(imgswitch_c==5)
     {
         imgswitch_c=0;
     }
-
-    lv_anim_set_time(&anim_left, 500);
-    lv_anim_set_user_data(&anim_left, ui_Image1);
-    lv_anim_set_custom_exec_cb(&anim_left, _ui_anim_callback_set_x);
-    lv_anim_set_values(&anim_left, 0, -800);
-    lv_anim_set_path_cb(&anim_left, lv_anim_path_ease_in_out);
-    lv_anim_set_delay(&anim_left,  0);
-    lv_anim_set_early_apply(&anim_left, false);
-    lv_anim_set_get_value_cb(&anim_left, &_ui_anim_callback_get_x);
-    lv_anim_start(&anim_left);
-
-    lv_anim_set_time(&anim_left2, 500);
-    lv_anim_set_user_data(&anim_left2, ui_Image3);
-    lv_anim_set_custom_exec_cb(&anim_left2, _ui_anim_callback_set_x);
-    lv_anim_set_values(&anim_left2, 0, -800);
-    lv_anim_set_path_cb(&anim_left2, lv_anim_path_ease_in_out);
-    lv_anim_set_delay(&anim_left2,  0);
-    lv_anim_set_early_apply(&anim_left2, false);
-    lv_anim_set_get_value_cb(&anim_left2, &_ui_anim_callback_get_x);
-    lv_anim_start(&anim_left2);
-
-
+    lv_img_set_src(ui_Image1, norflashimgname[imgswitch_c]);
 }
 
 
 void imganmitoright()
 {
-    lv_anim_t anim_right;
-    lv_anim_init(&anim_right);
-    lv_anim_t anim_right2;
-    lv_anim_init(&anim_right2);
-    uint16_t left_img_c =0;
-
     if(imgswitch_c==0)
     {
-        left_img_c = 2;
-    }
-    else if(imgswitch_c>0)
-    {
-        left_img_c = imgswitch_c -1;
-    }
-    if(left_img_c>=3)
-    {
-        left_img_c =0;
-    }
-
-
-    lv_obj_set_x(ui_Image1, 0);
-    lv_obj_set_x(ui_Image2, -800);
-    lv_obj_set_x(ui_Image3, 800);
-    lv_img_set_src(ui_Image1, norflashimgname[imgswitch_c]);
-    lv_img_set_src(ui_Image2, norflashimgname[left_img_c]);
-    if(imgswitch_c==0)
-    {
-        imgswitch_c =2;
+        imgswitch_c =4;
     }
     else if(imgswitch_c >0)
     {
         imgswitch_c--;
     }
-
-    lv_anim_set_time(&anim_right, 500);
-    lv_anim_set_user_data(&anim_right, ui_Image1);
-    lv_anim_set_custom_exec_cb(&anim_right, _ui_anim_callback_set_x);
-    lv_anim_set_values(&anim_right, 0, 800);
-    lv_anim_set_path_cb(&anim_right, lv_anim_path_ease_in_out);
-    lv_anim_set_delay(&anim_right,  0);
-    lv_anim_set_early_apply(&anim_right, false);
-    lv_anim_set_get_value_cb(&anim_right, &_ui_anim_callback_get_x);
-    lv_anim_start(&anim_right);
-
-    lv_anim_set_time(&anim_right2, 500);
-    lv_anim_set_user_data(&anim_right2, ui_Image2);
-    lv_anim_set_custom_exec_cb(&anim_right2, _ui_anim_callback_set_x);
-    lv_anim_set_values(&anim_right2, 0, 800);
-    lv_anim_set_path_cb(&anim_right2, lv_anim_path_ease_in_out);
-    lv_anim_set_delay(&anim_right2,  0);
-    lv_anim_set_early_apply(&anim_right2, false);
-    lv_anim_set_get_value_cb(&anim_right2, &_ui_anim_callback_get_x);
-    lv_anim_start(&anim_right2);
-
+    lv_img_set_src(ui_Image1, norflashimgname[imgswitch_c]);
 }
 
 
@@ -359,8 +90,6 @@ static void ui_event_btnleft(lv_event_t * e)
     lv_event_code_t event = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
     if(event == LV_EVENT_CLICKED) {
-        // albumshowleft_Animation(ui_Image1, 500);
-        
 			imganmitoleft();
     }
 }
@@ -369,9 +98,6 @@ static void ui_event_btnright(lv_event_t * e)
     lv_event_code_t event = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
     if(event == LV_EVENT_CLICKED) {
-        // imgxmoveanmi_Animation(ui_Image1, 0);
-        // img2xmoveanmi_Animation(ui_Image2, 0);
-        
 			imganmitoright();
     }
 }
@@ -382,30 +108,13 @@ static void ui_event_btnswitch(lv_event_t *e)
     lv_event_code_t event = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
     if(event == LV_EVENT_CLICKED) {
-        // LV_LOG_USER("switch btn clicked\n");
-
-        // 使用动画切换图片
-        // todo
-
-        // 直接切换图片
-//        LV_LOG_USER("ui_Image1 x :%d\n",lv_obj_get_x(ui_Image1));
-			
-//        lv_obj_set_x(ui_Image1, 0);
-//        lv_obj_set_x(ui_Image2, -800);
-//        lv_obj_set_x(ui_Image3, 800);
-			
-        lv_img_set_src(ui_Image1, imgsname[imgswitch_c]);
-//					lv_img_set_src(ui_Image1, norflashimgname[imgswitch_c]);
-
-			
-//        LV_LOG_USER("ui_Image1 x :%d\n",lv_obj_get_x(ui_Image1));
-//        LV_LOG_USER("imgsname[%d]=%s\n",imgswitch_c,imgsname[imgswitch_c]);
-        imgswitch_c++;
-        if(imgswitch_c== 3 )
-        {
-            imgswitch_c =0 ;
-        }
-        // imgxmoveanmi_Animation(ui_Image1, 0);
+//        imgswitch_c++;
+//        if(imgswitch_c==5 )
+//        {
+//            imgswitch_c =0 ;
+//        }
+//        lv_img_set_src(ui_Image1, imgsname[imgswitch_c]);
+			lv_albumpage_auto_update();
     }
 }
 
@@ -426,11 +135,6 @@ void ui_albumpage_screen_init(lv_obj_t *parent)
     // ui_Image1
 
     ui_Image1 = lv_img_create(ui_albumpage);
-//#if STM32F469_WORKSPACE==1
-//    lv_img_set_src(ui_Image1, &ui_img_testbg_png);
-//#elif VSCODE_SIMULATOR==1
-//    lv_img_set_src(ui_Image1, "S:imgs/holidaynight800.jpg");
-//#endif
 		lv_obj_set_style_border_width(ui_Image1,0,LV_STATE_DEFAULT);
 
 		lv_img_set_src(ui_Image1, &bg_lvgl);
@@ -444,71 +148,6 @@ void ui_albumpage_screen_init(lv_obj_t *parent)
 
     lv_obj_add_flag(ui_Image1, LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(ui_Image1, LV_OBJ_FLAG_SCROLLABLE);
-
-    // ui_Image2
-
-    ui_Image2 = lv_img_create(ui_albumpage);
-//#if STM32F469_WORKSPACE==1
-//    lv_img_set_src(ui_Image2, &ui_img_bg_lvgl_png);
-//#elif VSCODE_SIMULATOR==1
-//    lv_img_set_src(ui_Image2, "S:imgs/bg_lvgl.jpg");
-//#endif
- 
-
-    lv_obj_set_width(ui_Image2, 800);
-    lv_obj_set_height(ui_Image2, 480);
-
-    lv_obj_set_x(ui_Image2, -800);
-    lv_obj_set_y(ui_Image2, 0);
-
-    lv_obj_set_align(ui_Image2, LV_ALIGN_CENTER);
-
-    lv_obj_add_flag(ui_Image2, LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_clear_flag(ui_Image2, LV_OBJ_FLAG_SCROLLABLE);
-
-    // ui_Image3
-
-    ui_Image3 = lv_img_create(ui_albumpage);
-		
-		
-//#if STM32F469_WORKSPACE==1
-//    lv_img_set_src(ui_Image3, &ui_img_seaandsky800_png);
-//#elif VSCODE_SIMULATOR==1
-//    lv_img_set_src(ui_Image3, "S:imgs/seaandsky800.jpg");
-//#endif
-    
-    
-
-    lv_obj_set_width(ui_Image3, 800);
-    lv_obj_set_height(ui_Image3, 480);
-
-    lv_obj_set_x(ui_Image3, 800);
-    lv_obj_set_y(ui_Image3, 0);
-
-    lv_obj_set_align(ui_Image3, LV_ALIGN_CENTER);
-
-    lv_obj_add_flag(ui_Image3, LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_clear_flag(ui_Image3, LV_OBJ_FLAG_SCROLLABLE);
-
-    // ui_bottompanel
-
-//    ui_bottompanel = lv_obj_create(ui_albumpage);
-
-//    lv_obj_set_width(ui_bottompanel, 800);
-//    lv_obj_set_height(ui_bottompanel, 40);
-
-//    lv_obj_set_x(ui_bottompanel, 0);
-//    lv_obj_set_y(ui_bottompanel, 220);
-
-//    lv_obj_set_align(ui_bottompanel, LV_ALIGN_CENTER);
-
-//    lv_obj_clear_flag(ui_bottompanel, LV_OBJ_FLAG_SCROLLABLE);
-
-//    lv_obj_set_style_radius(ui_bottompanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-//    lv_obj_set_style_bg_color(ui_bottompanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-//    lv_obj_set_style_bg_opa(ui_bottompanel, 60, LV_PART_MAIN | LV_STATE_DEFAULT);
-//    lv_obj_set_style_border_width(ui_bottompanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
     // ui_btnleft
 
     ui_btnleft = lv_btn_create(ui_albumpage);
@@ -516,10 +155,6 @@ void ui_albumpage_screen_init(lv_obj_t *parent)
     lv_obj_set_width(ui_btnleft, 80);
     lv_obj_set_height(ui_btnleft,80);
 
-//    lv_obj_set_x(ui_btnleft, -200);
-//    lv_obj_set_y(ui_btnleft, 0);
-
-//    lv_obj_set_align(ui_btnleft, LV_ALIGN_CENTER);
 		lv_obj_align(ui_btnleft,LV_ALIGN_LEFT_MID,0,0);
     lv_obj_add_flag(ui_btnleft, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_obj_clear_flag(ui_btnleft, LV_OBJ_FLAG_SCROLLABLE);
@@ -591,11 +226,6 @@ void ui_albumpage_screen_init(lv_obj_t *parent)
 
     lv_obj_set_width(ui_btnright, 80);
     lv_obj_set_height(ui_btnright,80);
-
-//    lv_obj_set_x(ui_btnright, 200);
-//    lv_obj_set_y(ui_btnright, 0);
-
-//    lv_obj_set_align(ui_btnright, LV_ALIGN_CENTER);
 		lv_obj_align(ui_btnright,LV_ALIGN_RIGHT_MID,0,0);
     lv_obj_add_flag(ui_btnright, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_obj_clear_flag(ui_btnright, LV_OBJ_FLAG_SCROLLABLE);
@@ -624,4 +254,224 @@ void ui_albumpage_screen_init(lv_obj_t *parent)
     lv_label_set_text(ui_Labbtnright, LV_SYMBOL_RIGHT);
 
 }
+
+void lv_albumpage_auto_update()
+{
+	if(imgs_current_show != RT_NULL)
+	{
+		if(imgs_current_show->imgs_lvgl_path)
+		{
+			rt_kprintf("[%d/%d]   %s  \n",imgs_current_show->imgs_count,imgs_current_show->imgs_total_nums,imgs_current_show->imgs_lvgl_path);
+			lv_img_set_src(ui_Image1, imgs_current_show->imgs_lvgl_path);
+			imgs_current_show = imgs_current_show->next;
+			if(imgs_current_show == RT_NULL)
+			{
+				imgs_current_show = imgs_list_head;
+			}
+		}
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 读取 SD 卡中图片信息，整理成一个列表，提供给 img page 后续使用
+void imgs_list_init()
+{
+	imgs_mgt_t *imgs_list_p = RT_NULL;	
+	imgs_mgt_t *imgs_list_q = RT_NULL;	
+	DIR *dirp;
+	struct dirent *d;
+	int imgs_count =0;
+	int imgs_total_nums =0;
+	int len=0;
+	
+
+	/* 打开 / dir_test 目录 */
+	dirp = opendir("/imgs");
+	if (dirp == RT_NULL)
+	{
+			rt_kprintf("open directory error!\n");
+	}
+	else
+	{
+			
+			/* 读取目录 */
+			while ((d = readdir(dirp)) != RT_NULL)
+			{
+				//rt_kprintf("found %s\n", d->d_name);
+				imgs_total_nums++;
+			}
+			/* 关闭目录 */
+			closedir(dirp);
+	}
+	
+	rt_kprintf("img total nums :%d\n",imgs_total_nums);
+	
+	/* 打开 / dir_test 目录 */
+	dirp = opendir("/imgs");
+	if (dirp == RT_NULL)
+	{
+			rt_kprintf("open directory error!\n");
+	}
+	else
+	{
+			
+			/* 读取目录 */
+			while ((d = readdir(dirp)) != RT_NULL)
+			{
+				len = rt_strlen(d->d_name);
+				imgs_list_p = (imgs_mgt_t *)rt_malloc(sizeof(imgs_mgt_t));
+				if(imgs_list_p== RT_NULL)
+				{
+					rt_kprintf("imgs_list_p malloc fail\n");
+					goto __exit ;
+				}
+				// 插入图片名称
+				imgs_list_p->imgs_path = (char *)rt_malloc(sizeof(char)*len+10);
+				if(imgs_list_p->imgs_path== RT_NULL)
+				{
+					rt_kprintf("imgs_path malloc fail\n");
+					goto __exit ;
+				}
+				imgs_list_p->imgs_lvgl_path = (char *)rt_malloc(sizeof(char)*len+10);
+				if(imgs_list_p->imgs_lvgl_path== RT_NULL)
+				{
+					rt_kprintf("imgs_lvgl_path malloc fail\n");
+					goto __exit ;
+				}			
+				
+				rt_sprintf(imgs_list_p->imgs_path,"/imgs/%s",d->d_name);
+				rt_sprintf(imgs_list_p->imgs_lvgl_path,"S:imgs/%s",d->d_name);
+				imgs_count++;
+				imgs_list_p->imgs_count      =  imgs_count;
+				imgs_list_p->imgs_total_nums =  imgs_total_nums;
+				imgs_list_p->next = RT_NULL;
+				rt_kprintf("[%d/%d] %s  \n",imgs_list_p->imgs_count,imgs_list_p->imgs_total_nums,imgs_list_p->imgs_path );
+
+				// 向链表中新增节点
+				if(imgs_list_head == RT_NULL)
+				{
+					imgs_list_head = imgs_list_p;
+					imgs_list_q = imgs_list_head;					
+				}
+				else
+				{
+					while(imgs_list_q->next!=RT_NULL)
+					{
+						imgs_list_q = imgs_list_q->next;
+					}
+					imgs_list_q->next = imgs_list_p;
+				}
+			}
+			/* 关闭目录 */
+			closedir(dirp);
+			return ;
+	}
+	
+	
+__exit:
+	imgs_list_deinit();
+	if(dirp)
+	{
+		closedir(dirp);
+	}
+}
+
+
+void imgs_set_current_img_node_head()
+{
+	if(imgs_list_head)
+	{
+		imgs_current_show = imgs_list_head;
+	}
+}
+
+
+void imgs_list_show()
+{
+	imgs_mgt_t *imgs_list_p = imgs_list_head;
+	imgs_mgt_t *imgs_list_q= imgs_list_p;
+	
+	if(imgs_list_q != RT_NULL)
+	{
+		//while(imgs_list_q  && imgs_list_q->next!=RT_NULL)
+		while(imgs_list_q)
+		{
+			rt_kprintf("[%d/%d]   %s  \n",imgs_list_q->imgs_count,imgs_list_q->imgs_total_nums,imgs_list_q->imgs_lvgl_path);
+			imgs_list_q = imgs_list_q->next;
+		}
+	}
+}
+
+
+
+void imgs_list_deinit()
+{
+	imgs_mgt_t *imgs_list_p = imgs_list_head;
+	imgs_mgt_t *imgs_list_q= RT_NULL;
+	
+	if(imgs_list_p != RT_NULL)
+	{
+		while(imgs_list_p)
+		{
+			imgs_list_q = imgs_list_p->next;
+			if(imgs_list_p->imgs_path)
+			{
+				rt_free(imgs_list_p->imgs_path);
+			}
+			if(imgs_list_p->imgs_lvgl_path)
+			{
+				rt_free(imgs_list_p->imgs_lvgl_path);
+			}
+			rt_free(imgs_list_p);	
+			imgs_list_p = imgs_list_q;
+		}
+		imgs_list_head = RT_NULL;
+	}
+}
+
+
+
+
+// read imgs name 
+
+static void readimgsdir_sample(void)
+{
+    DIR *dirp;
+    struct dirent *d;
+
+    /* 打开 / dir_test 目录 */
+    dirp = opendir("/imgs");
+    if (dirp == RT_NULL)
+    {
+        rt_kprintf("open directory error!\n");
+    }
+    else
+    {
+        /* 读取目录 */
+        while ((d = readdir(dirp)) != RT_NULL)
+        {
+            rt_kprintf("found %s\n", d->d_name);
+        }
+
+        /* 关闭目录 */
+        closedir(dirp);
+    }
+}
+/* 导出到 msh 命令列表中 */
+MSH_CMD_EXPORT(readimgsdir_sample, readdir imgs dir sample);
+
+
 
