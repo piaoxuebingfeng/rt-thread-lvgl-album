@@ -86,6 +86,12 @@ void guiconf_read(guiconf_t *guiconf)
 	rt_strcpy(guiconf->apikey,item->valuestring);
 	LOG_I("read guiconf apikey:%s\n",item->valuestring);
 
+	// get cityid
+	item = cJSON_GetObjectItem(root,"cityid");
+	rt_memset(guiconf->cityid,0,CONF_STR_MIN_LEN);
+	rt_strcpy(guiconf->cityid,item->valuestring);
+	LOG_I("read guiconf cityid:%s\n",item->valuestring);
+	
 	guiconf->valid =1;
 	
 	
@@ -117,6 +123,7 @@ void guiconf_print(guiconf_t *guiconf)
 		LOG_I("ssid :%s",guiconf->wifi_ssid);
 		LOG_I("wifi_passwd :%s",guiconf->wifi_passwd);
 		LOG_I("apikey :%s",guiconf->apikey);
+		LOG_I("cityid :%s",guiconf->cityid);
 	}
 	else
 	{
@@ -148,6 +155,18 @@ void guiconf_set_wifipasswd(guiconf_t *guiconf,const char *wifipasswd)
 		rt_strcpy(guiconf->wifi_passwd,wifipasswd);
 }
 
+void guiconf_set_cityid(guiconf_t *guiconf,const char *cityid)
+{
+		if(guiconf ==RT_NULL && cityid == RT_NULL)
+		{
+			return ;
+		}
+		rt_memset(guiconf->cityid,0,CONF_STR_MIN_LEN);
+		rt_strcpy(guiconf->cityid,cityid);
+}
+
+
+
 void guiconf_write(guiconf_t *guiconf)
 {
 	static cJSON *root = RT_NULL;
@@ -168,7 +187,8 @@ void guiconf_write(guiconf_t *guiconf)
 	cJSON_AddStringToObject(root,"passwd",guiconf->wifi_passwd);
 	
 	cJSON_AddStringToObject(root,"apikey",guiconf->apikey);
-
+	
+	cJSON_AddStringToObject(root,"cityid",guiconf->cityid);
     cjsonstr =  cJSON_Print(root);
     
     LOG_I("cjson str : %s \n",cjsonstr);

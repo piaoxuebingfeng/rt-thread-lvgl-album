@@ -96,7 +96,7 @@ char lv_100ask_page_manager_get_current_page(lv_obj_t * page_manager,char *name)
  
 void lv_page_top_status_set_wifi_label(uint8_t connect_status);
 void lv_page_top_status_set_sdcard_label(char sdcard_status);
-void lv_page_top_status_set_time_label(const char *curr_time);
+//void lv_page_top_status_set_time_label(const char *curr_time);
 void lv_page_top_status_set_location_label(const char *location_str);
 /*=====================
  * Getter functions

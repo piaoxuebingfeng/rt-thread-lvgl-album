@@ -80,37 +80,6 @@ static void my_desktop_main_page(lv_obj_t * page)
 {
 	extern void lv_desktop_backbtn_test(lv_obj_t * page);
 	lv_desktop_backbtn_test(page);
-	
-
-
-//    static lv_style_t style;
-//    lv_style_init(&style);
-//    lv_style_set_flex_flow(&style, LV_FLEX_FLOW_ROW_WRAP);
-//    lv_style_set_flex_main_place(&style, LV_FLEX_ALIGN_SPACE_EVENLY);
-//    lv_style_set_layout(&style, LV_LAYOUT_FLEX);
-
-//    lv_obj_t * cont = lv_obj_create(page);
-//    lv_obj_set_size(cont, LV_PCT(95), LV_PCT(20));
-//    lv_obj_center(cont);
-//    lv_obj_add_style(cont, &style, 0);
-
-
-//    lv_obj_t * obj1 = lv_obj_create(cont);
-//    lv_obj_set_size(obj1, LV_SIZE_CONTENT, LV_PCT(100));
-//    lv_obj_add_flag(obj1, LV_OBJ_FLAG_CHECKABLE);
-//    lv_obj_t * label1 = lv_label_create(obj1);
-//    lv_label_set_text(label1, "clockscr");
-//    lv_obj_center(label1);
-//    lv_100ask_page_manager_set_load_page_event(obj1, NULL, lv_label_get_text(label1));
-
-
-//    lv_obj_t * obj2 = lv_obj_create(cont);
-//    lv_obj_set_size(obj2, LV_SIZE_CONTENT, LV_PCT(100));
-//    lv_obj_add_flag(obj2, LV_OBJ_FLAG_CHECKABLE);
-//    lv_obj_t * label2 = lv_label_create(obj2);
-//    lv_label_set_text(label2, "imgscr");
-//    lv_obj_center(label2);
-//    lv_100ask_page_manager_set_load_page_event(obj2, NULL, lv_label_get_text(label2));
 }
 
 
@@ -212,15 +181,13 @@ void update_top_status_bar(struct tm *p)
 		{
 			lv_page_top_status_set_wifi_label(0);
 		}
-		
-		//void lv_page_top_status_set_sdcard_label(char sdcard_status);
-		//void lv_page_top_status_set_location_label(const char *location_str);
-		if(p)
-		{
-			rt_memset(ptimestr,0,10);
-			rt_sprintf(ptimestr,"%02d:%02d",p->tm_hour,p->tm_min);
-			lv_page_top_status_set_time_label(ptimestr);
-		}
+//		if(p)
+//		{
+//			rt_memset(ptimestr,0,10);
+//			rt_sprintf(ptimestr,"%02d:%02d:%02d",p->tm_hour,p->tm_min,p->tm_sec);
+//			//rt_kprintf("%s\n",ptimestr);
+//			lv_page_top_status_set_time_label(ptimestr);
+//		}
 }
 
 void lv_desktop_gui_page_update()
@@ -232,10 +199,6 @@ void lv_desktop_gui_page_update()
 	
 	if(page_manager)
 	{
-		if(!lv_100ask_page_manager_get_current_page(page_manager,"deskmainpage"))
-		{
-				update_top_status_bar(p);
-		}
 		if(lv_100ask_page_manager_get_current_page(page_manager,"deskmainpage"))
 		{
 			desktopmainpage_update();
@@ -246,14 +209,16 @@ void lv_desktop_gui_page_update()
 			{				
 				lv_my_calendar_set_date(p->tm_year+1900, p->tm_mon+1, p->tm_mday);
 				lv_clock_label_update(p->tm_hour,p->tm_min,p->tm_sec);		
+				update_top_status_bar(p);
 			}
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"imgscr"))
 		{
-			if(p->tm_sec%30==0)
+			if(p->tm_sec%20==0)
 			{
 				lv_albumpage_auto_update();
 			}
+			update_top_status_bar(p);
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"newsscr"))
 		{
@@ -265,15 +230,25 @@ void lv_desktop_gui_page_update()
 			{
 				news_show_update();
 			}
+			
+			update_top_status_bar(p);
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"game2048"))
 		{
+			update_top_status_bar(p);
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"weatherscr"))
 		{
+			if(p->tm_sec %20 ==0 && p->tm_sec !=0)
+			{
+				weatherpageui_update(p);
+			}
+			update_top_status_bar(p);
 		}
 		else if(lv_100ask_page_manager_get_current_page(page_manager,"settingscr"))
 		{
+			
+			update_top_status_bar(p);
 		}
 	}
 }

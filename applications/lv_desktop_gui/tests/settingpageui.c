@@ -5,6 +5,8 @@
 extern void esp32_device_reset_wifi_info();
 extern void esp32_device_wifiscanning(void *scan_res);
 
+LV_FONT_DECLARE(HarmonyOS_Sans_SC_Medium);
+
 
 ///////////////////// VARIABLES ////////////////////
 static lv_obj_t * ui_ScreenPage;
@@ -28,6 +30,16 @@ static lv_obj_t * ui_rightpanelwifiscan;
 static lv_obj_t * ui_wifiscan_btn;
 static lv_obj_t * ui_lab_wifiscan_btn;
 static lv_obj_t * ui_wifiscanres_roller;
+
+
+
+static lv_obj_t * ui_rightpanelfontpage;
+static lv_obj_t * ui_rightpanelupdatepage;
+
+
+static lv_obj_t * ui_rightpanelsystempage;
+static lv_obj_t * system_version_label;
+
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 // #if LV_COLOR_DEPTH != 16
@@ -56,16 +68,41 @@ static void ui_Roller2_event_handler(lv_event_t *e)
         {
         case 0:   // wifi setting panel
             lv_obj_clear_flag(ui_rightpanelwifi,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelfontpage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelupdatepage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelsystempage,LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(ui_rightpanelwifiscan,LV_OBJ_FLAG_HIDDEN);
+						
             break;
-        case 1:   // wifi scaning panel
+        case 1:   // font panel
+            lv_obj_add_flag(ui_rightpanelwifi,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_clear_flag(ui_rightpanelfontpage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelupdatepage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelsystempage,LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_rightpanelwifiscan,LV_OBJ_FLAG_HIDDEN);
+						
+            break;
+        case 2:   // wifi scaning panel
             lv_obj_clear_flag(ui_rightpanelwifiscan,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelfontpage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelupdatepage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelsystempage,LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(ui_rightpanelwifi,LV_OBJ_FLAG_HIDDEN);
             break;
-        case 2:  // update panel
+        case 3:  // update panel
+						lv_obj_add_flag(ui_rightpanelwifiscan,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelfontpage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_clear_flag(ui_rightpanelupdatepage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelsystempage,LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_rightpanelwifi,LV_OBJ_FLAG_HIDDEN);
             break;
-        case 3: // system panel
-            break;
+        case 4: // system panel
+            lv_obj_add_flag(ui_rightpanelwifiscan,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelfontpage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_add_flag(ui_rightpanelupdatepage,LV_OBJ_FLAG_HIDDEN);
+						lv_obj_clear_flag(ui_rightpanelsystempage,LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_rightpanelwifi,LV_OBJ_FLAG_HIDDEN);
+						break;
         default:
             break;
         }
@@ -118,13 +155,58 @@ static void wifisetbtn_event(lv_event_t *e)
 }
 
 
+
+static void msgbox_event_cb(lv_event_t * e)
+{
+    lv_obj_t * obj = lv_event_get_current_target(e);
+    LV_LOG_USER("Button %s clicked", lv_msgbox_get_active_btn_text(obj));
+		lv_msgbox_close(obj);
+}	
+
+
+static void update_check_btn_event(lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t * obj = lv_event_get_target(e);
+	static const char * btns[] ={"OK", ""};
+
+	
+	if(code == LV_EVENT_CLICKED)
+	{
+    lv_obj_t * mbox1 = lv_msgbox_create(NULL, "", "待开发.", btns, false);
+		lv_obj_set_style_text_font(mbox1, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(mbox1, msgbox_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_center(mbox1);
+	}
+}
+
+static void software_update_btn_event(lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t * obj = lv_event_get_target(e);
+	static const char * btns[] ={"OK", ""};
+
+	
+	if(code == LV_EVENT_CLICKED)
+	{
+    lv_obj_t * mbox1 = lv_msgbox_create(NULL, "", "待开发.", btns, false);
+		lv_obj_set_style_text_font(mbox1, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(mbox1, msgbox_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_center(mbox1);
+	}
+}
+
+
+
 static void wifiscan_btn_event(lv_event_t *e)
 {
 	lv_event_code_t code = lv_event_get_code(e);
 	lv_obj_t * obj = lv_event_get_target(e);
 	char *res = RT_NULL;
 	
-	res = rt_malloc(128*50*sizeof(char));
+	res = rt_malloc(5120*sizeof(char));
 	
 	if(res == RT_NULL)
 	{
@@ -195,7 +277,7 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     ui_Roller2 = lv_roller_create(ui_leftpanel);
 		lv_obj_set_style_border_width(ui_Roller2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(ui_Roller2,lv_color_make(255,255,255),LV_STATE_DEFAULT);
-    lv_roller_set_options(ui_Roller2, "WIFI\nSCANNING\nUPDATE\nSYSTEM\n", LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_options(ui_Roller2, "WIFI\nFONT\nSCANNING\nUPDATE\nSYSTEM\n", LV_ROLLER_MODE_NORMAL);
 
     lv_obj_set_width(ui_Roller2, 275);
     lv_obj_set_height(ui_Roller2, 425);
@@ -324,7 +406,7 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     // else lv_textarea_set_accepted_chars(ui_textwifissid, "");
 
     lv_textarea_set_text(ui_textwifissid, "");
-    lv_textarea_set_placeholder_text(ui_textwifissid, "your wifi ssid");
+    lv_textarea_set_placeholder_text(ui_textwifissid, "Your wifi ssid");
 
     lv_obj_add_state(ui_textwifissid, LV_STATE_CHECKED | LV_STATE_FOCUSED);
 
@@ -343,7 +425,7 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     lv_obj_set_style_text_align(ui_textwifissid, LV_TEXT_ALIGN_AUTO, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_textwifissid,textarea_event, LV_EVENT_FOCUSED, NULL);
-
+		lv_textarea_set_text(ui_textwifissid,guiconf_global.wifi_ssid);
     // ui_textwifipassword
 
     ui_textwifipassword = lv_textarea_create(ui_rightpanelwifi);
@@ -378,7 +460,7 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     lv_obj_set_style_text_align(ui_textwifipassword, LV_TEXT_ALIGN_AUTO, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_textwifipassword,textarea_event, LV_EVENT_FOCUSED, NULL);
-
+		lv_textarea_set_text(ui_textwifipassword,guiconf_global.wifi_passwd);
     // ui_Keyboard2
 
     ui_Keyboard2 = lv_keyboard_create(ui_rightpanelwifi);
@@ -419,8 +501,8 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
 
 
     ui_wifiscan_btn = lv_btn_create(ui_rightpanelwifiscan);
-    
-    lv_obj_align(ui_wifiscan_btn,LV_ALIGN_BOTTOM_MID,0,20);
+    lv_obj_set_height(ui_wifiscan_btn,60);
+    lv_obj_align(ui_wifiscan_btn,LV_ALIGN_BOTTOM_MID,0,0);
 		lv_obj_add_event_cb(ui_wifiscan_btn,wifiscan_btn_event,LV_EVENT_CLICKED,NULL);
 
     ui_lab_wifiscan_btn = lv_label_create(ui_wifiscan_btn);
@@ -444,6 +526,106 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     lv_obj_set_style_bg_color(ui_wifiscanres_roller, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_wifiscanres_roller, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_wifiscanres_roller,0,LV_STATE_DEFAULT);
+		
+		
+		ui_rightpanelfontpage = lv_obj_create(ui_panel);
 
+    lv_obj_set_width(ui_rightpanelfontpage, 500);
+    lv_obj_set_height(ui_rightpanelfontpage, 430);
 
+		lv_obj_align(ui_rightpanelfontpage,LV_ALIGN_RIGHT_MID,0,0);
+    lv_obj_clear_flag(ui_rightpanelfontpage,
+                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
+
+    lv_obj_set_style_bg_color(ui_rightpanelfontpage, lv_color_hex(0xD6BBA6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_rightpanelfontpage, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_rightpanelfontpage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_flag(ui_rightpanelfontpage,LV_OBJ_FLAG_HIDDEN);
+		
+		// ui_rightpanelupdatepage
+		
+		
+    ui_rightpanelupdatepage = lv_obj_create(ui_panel);
+
+    lv_obj_set_width(ui_rightpanelupdatepage, 500);
+    lv_obj_set_height(ui_rightpanelupdatepage, 430);
+
+		lv_obj_align(ui_rightpanelupdatepage,LV_ALIGN_RIGHT_MID,0,0);
+    lv_obj_clear_flag(ui_rightpanelupdatepage,
+                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
+
+    lv_obj_set_style_bg_color(ui_rightpanelupdatepage, lv_color_hex(0xD6BBA6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_rightpanelupdatepage, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_rightpanelupdatepage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_flag(ui_rightpanelupdatepage,LV_OBJ_FLAG_HIDDEN);
+
+		// 固件版本信息
+		lv_obj_t * current_software_ver_label = lv_label_create(ui_rightpanelupdatepage);
+		lv_obj_set_width(current_software_ver_label, 300);
+    lv_obj_set_height(current_software_ver_label,30);
+		lv_obj_align(current_software_ver_label,LV_ALIGN_TOP_LEFT,0,0);
+		lv_obj_set_style_text_font(current_software_ver_label, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_label_set_text(current_software_ver_label,"当前版本: V1.0");
+		
+		lv_obj_t * new_software_ver_label = lv_label_create(ui_rightpanelupdatepage);
+		lv_obj_set_width(new_software_ver_label, 300);
+    lv_obj_set_height(new_software_ver_label,30);
+		lv_obj_align_to(new_software_ver_label,current_software_ver_label,LV_ALIGN_OUT_BOTTOM_MID,0,10);
+		lv_obj_set_style_text_font(new_software_ver_label, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_label_set_text(new_software_ver_label,"新版本:  TODO");
+		
+		// 检查固件按钮
+		lv_obj_t * update_check_btn = lv_btn_create(ui_rightpanelupdatepage);
+    lv_obj_set_height(update_check_btn,60);
+    lv_obj_align(update_check_btn,LV_ALIGN_BOTTOM_LEFT,50,0);
+		lv_obj_add_event_cb(update_check_btn,update_check_btn_event,LV_EVENT_CLICKED,NULL);
+
+    lv_obj_t *  update_check_btn_label = lv_label_create(update_check_btn);
+    lv_obj_center(update_check_btn_label);
+		lv_obj_set_style_text_font(update_check_btn_label, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_set_text(update_check_btn_label, "检查固件");
+		
+		lv_obj_t * software_update_btn = lv_btn_create(ui_rightpanelupdatepage);
+    lv_obj_set_height(software_update_btn,60);
+    lv_obj_align(software_update_btn,LV_ALIGN_BOTTOM_RIGHT,-50,0);
+		lv_obj_add_event_cb(software_update_btn,software_update_btn_event,LV_EVENT_CLICKED,NULL);
+
+    lv_obj_t *  software_update_btn_label = lv_label_create(software_update_btn);
+    lv_obj_center(software_update_btn_label);
+		lv_obj_set_style_text_font(software_update_btn_label, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_set_text(software_update_btn_label, "更新固件");
+		
+		
+		// ui_rightpanelsystempage
+		
+    ui_rightpanelsystempage = lv_obj_create(ui_panel);
+
+    lv_obj_set_width(ui_rightpanelsystempage, 500);
+    lv_obj_set_height(ui_rightpanelsystempage, 430);
+
+		lv_obj_align(ui_rightpanelsystempage,LV_ALIGN_RIGHT_MID,0,0);
+    lv_obj_clear_flag(ui_rightpanelsystempage,
+                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
+
+    lv_obj_set_style_bg_color(ui_rightpanelsystempage, lv_color_hex(0xD6BBA6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_rightpanelsystempage, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_rightpanelsystempage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_flag(ui_rightpanelsystempage,LV_OBJ_FLAG_HIDDEN);
+		
+		
+		system_version_label = lv_label_create(ui_rightpanelsystempage);
+		lv_obj_set_width(system_version_label, 300);
+    lv_obj_set_height(system_version_label, 30);
+		lv_obj_align(system_version_label,LV_ALIGN_TOP_LEFT,10,10);
+		lv_label_set_text(system_version_label,"VERSION: 1.0");
+
+		lv_obj_t * cpu_label = lv_label_create(ui_rightpanelsystempage);
+		lv_obj_set_width(cpu_label, 300);
+    lv_obj_set_height(cpu_label, 30);
+		lv_obj_align_to(cpu_label,system_version_label,LV_ALIGN_OUT_BOTTOM_MID,0,0);
+		lv_label_set_text(cpu_label,"MCU: STM32F469NIH6U");
+		
 }

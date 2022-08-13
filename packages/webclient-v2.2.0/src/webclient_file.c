@@ -504,12 +504,24 @@ int getnews(int argc,char **argv)
 }
 
 
+int getweather(int argc,char **argv)
+{
+	char weather_uri[200]={0};
+
+	rt_memset(weather_uri,0,200);
+	rt_sprintf(weather_uri,"%s%s","http://t.weather.sojson.com/api/weather/city/",guiconf_global.cityid);
+	webclient_get_file(weather_uri,"/tmp/weather");
+}
+
+
 
 #ifdef FINSH_USING_MSH
 #include <finsh.h>
 MSH_CMD_EXPORT(wget, Get file by URI: wget <URI> <filename>.);
 MSH_CMD_EXPORT(getnews, get news.);
 
+
+MSH_CMD_EXPORT(getweather, get weather.);
 
 
 

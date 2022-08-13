@@ -18,14 +18,55 @@
 #include <finsh.h>
 
 #define GET_HEADER_BUFSZ        1024        //头部大小
-#define GET_RESP_BUFSZ          1024        //响应缓冲区大小
+#define GET_RESP_BUFSZ          8192        //响应缓冲区大小
 #define GET_URL_LEN_MAX         256         //网址最大长度
 
-#define GET_URI                 "http://www.weather.com.cn/data/sk/%s.html" //获取天气的 API
+
+//#define GET_URI                 "http://www.weather.com.cn/data/sk/%s.html" //获取天气的 API
 #define AREA_ID                 "101180101" //河南 郑州
 
 /* 天气数据解析 */
 
+//void weather_data_parse(rt_uint8_t *data)
+//{
+//    cJSON *root = RT_NULL, *object = RT_NULL, *item = RT_NULL;
+
+//    root = cJSON_Parse((const char *)data);
+//    if (!root)
+//    {
+//        rt_kprintf("No memory for cJSON root!\n");
+//        return;
+//    }
+//    object = cJSON_GetObjectItem(root, "weatherinfo");
+
+//    item = cJSON_GetObjectItem(object, "city");
+//    rt_kprintf("\ncity:%s ", item->valuestring);
+
+//    item = cJSON_GetObjectItem(object, "temp");
+//    rt_kprintf("\ntemp    :%s ", item->valuestring);
+
+//    item = cJSON_GetObjectItem(object, "WD");
+//    rt_kprintf("\nWD      :%s ", item->valuestring);
+
+//    item = cJSON_GetObjectItem(object, "WS");
+//    rt_kprintf("\nWS      :%s ", item->valuestring);
+
+//    item = cJSON_GetObjectItem(object, "SD");
+//    rt_kprintf("\nSD      :%s ", item->valuestring);
+
+////    item = cJSON_GetObjectItem(object, "date");
+////    rt_kprintf("\ndate    :%s", item->valuestring);
+
+//    item = cJSON_GetObjectItem(object, "time");
+//    rt_kprintf("\ntime    :%s \n", item->valuestring);
+
+//    if (root != RT_NULL)
+//        cJSON_Delete(root);
+//}
+
+
+//#define GET_URI 								"http://www.weather.com.cn/data/cityinfo/%s.html"
+// 解析天气数据
 void weather_data_parse(rt_uint8_t *data)
 {
     cJSON *root = RT_NULL, *object = RT_NULL, *item = RT_NULL;
@@ -39,29 +80,88 @@ void weather_data_parse(rt_uint8_t *data)
     object = cJSON_GetObjectItem(root, "weatherinfo");
 
     item = cJSON_GetObjectItem(object, "city");
-    rt_kprintf("\ncity:%s ", item->valuestring);
+    rt_kprintf("\n city:%s ", item->valuestring);
 
-    item = cJSON_GetObjectItem(object, "temp");
-    rt_kprintf("\ntemp    :%s ", item->valuestring);
+    item = cJSON_GetObjectItem(object, "temp1");
+    rt_kprintf("\n temp1   :%s ", item->valuestring);
 
-    item = cJSON_GetObjectItem(object, "WD");
-    rt_kprintf("\nWD      :%s ", item->valuestring);
-
-    item = cJSON_GetObjectItem(object, "WS");
-    rt_kprintf("\nWS      :%s ", item->valuestring);
-
-    item = cJSON_GetObjectItem(object, "SD");
-    rt_kprintf("\nSD      :%s ", item->valuestring);
-
-//    item = cJSON_GetObjectItem(object, "date");
-//    rt_kprintf("\ndate    :%s", item->valuestring);
-
-    item = cJSON_GetObjectItem(object, "time");
-    rt_kprintf("\ntime    :%s \n", item->valuestring);
+    item = cJSON_GetObjectItem(object, "temp2");
+    rt_kprintf("\n temp2   :%s ", item->valuestring);
+		
+    item = cJSON_GetObjectItem(object, "weather");
+    rt_kprintf("\n weather   :%s ", item->valuestring);
+		
+    item = cJSON_GetObjectItem(object, "ptime");
+    rt_kprintf("\n ptime   :%s \n", item->valuestring);
 
     if (root != RT_NULL)
         cJSON_Delete(root);
 }
+
+
+
+#define GET_URI 								"http://t.weather.sojson.com/api/weather/city/%s"
+// 
+//http://t.weather.sojson.com/api/weather/city/101180101   json 格式数据解析
+void weather_sojson_data_parse(rt_uint8_t *data)
+{
+    cJSON *root = RT_NULL, *object = RT_NULL, *item = RT_NULL;
+		cJSON *cityInfo_obj = RT_NULL;
+		cJSON *dataobj = RT_NULL;
+		cJSON *JsonArray =RT_NULL;
+		uint16_t jsonarray_size =0;
+		uint16_t i =0;
+
+    root = cJSON_Parse((const char *)data);
+    if (!root)
+    {
+        rt_kprintf("No memory for cJSON root!\n");
+        return;
+    }
+    cityInfo_obj = cJSON_GetObjectItem(root, "cityInfo");
+
+    item = cJSON_GetObjectItem(cityInfo_obj, "city");
+    rt_kprintf("\n city:%s ", item->valuestring);
+
+		
+		dataobj = cJSON_GetObjectItem(root, "data");
+		
+		JsonArray = cJSON_GetObjectItem(dataobj,"forecast");
+		
+		jsonarray_size = cJSON_GetArraySize(JsonArray);
+		for(i=0;i<jsonarray_size;i++)
+		{
+			object = cJSON_GetArrayItem(JsonArray,i);
+			
+			item = cJSON_GetObjectItem(object, "ymd");
+			rt_kprintf("\n date   :%s ", item->valuestring);
+			
+			item = cJSON_GetObjectItem(object, "type");
+			rt_kprintf("\n type   :%s ", item->valuestring);
+			
+			item = cJSON_GetObjectItem(object, "high");
+			rt_kprintf("\n high   :%s ", item->valuestring);
+			
+			item = cJSON_GetObjectItem(object, "low");
+			rt_kprintf("\n low   :%s ", item->valuestring);
+			
+			item = cJSON_GetObjectItem(object, "sunrise");
+			rt_kprintf("\n sunrise   :%s ", item->valuestring);
+			
+			item = cJSON_GetObjectItem(object, "sunset");
+			rt_kprintf("\n sunset   :%s ", item->valuestring);
+			
+			item = cJSON_GetObjectItem(object, "notice");
+			rt_kprintf("\n notice   :%s ", item->valuestring);
+		}
+		
+    if (root != RT_NULL)
+        cJSON_Delete(root);
+}
+
+
+
+
 void weather(int argc, char **argv)
 {
     rt_uint8_t *buffer = RT_NULL;
@@ -133,8 +233,8 @@ void weather(int argc, char **argv)
     }
 
     /* 天气数据解析 */
-    weather_data_parse(buffer);
-
+//    weather_data_parse(buffer);
+		weather_sojson_data_parse(buffer);
 __exit:
     /* 释放网址空间 */
     if (weather_url != RT_NULL)

@@ -53,7 +53,7 @@ static lv_obj_t * get_page(lv_obj_t * page_manager, char *name);
 lv_obj_t *top_status_bar_panel;
 lv_obj_t *top_status_wifi_label;
 lv_obj_t *top_status_sdcard_label;
-lv_obj_t *top_status_time_label;
+static lv_obj_t *top_status_time_label;
 lv_obj_t *top_status_location_label;
 
 static void lv_page_top_status_bar_create(lv_obj_t *parent);
@@ -401,7 +401,7 @@ static void lv_page_back_btn_create(lv_obj_t * parent)
     lv_obj_add_flag(back_btn, LV_OBJ_FLAG_CLICKABLE);
 
     lv_obj_t * label = lv_label_create(back_btn);
-    lv_label_set_text(label, "MENU");
+    lv_label_set_text(label, "BACK");
 		lv_obj_clear_flag(label,LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_center(label);
 
@@ -482,10 +482,10 @@ static void lv_page_top_status_bar_create(lv_obj_t *parent)
     lv_obj_set_style_text_color(top_status_sdcard_label,lv_color_make(255,0,255),LV_STATE_DEFAULT);
     
     
-    top_status_time_label  = lv_label_create(top_status_bar_panel);
-    lv_obj_align(top_status_time_label, LV_ALIGN_CENTER,0, 0);
-    lv_label_set_text(top_status_time_label,"08:00");
-    lv_obj_set_style_text_color(top_status_time_label,lv_color_make(255,255,255),LV_STATE_DEFAULT);
+//    top_status_time_label  = lv_label_create(top_status_bar_panel);
+//    lv_obj_align(top_status_time_label, LV_ALIGN_CENTER,0, 0);
+//    lv_label_set_text(top_status_time_label,"08:00");
+//    lv_obj_set_style_text_color(top_status_time_label,lv_color_make(255,255,255),LV_STATE_DEFAULT);
 		
 		lv_obj_t *top_status_location_icon = lv_img_create(top_status_bar_panel);
 	  lv_img_set_src(top_status_location_icon, &ui_img_iconlocation16_png);
@@ -531,14 +531,19 @@ void lv_page_top_status_set_sdcard_label(char sdcard_status)
         }
     }
 }
-void lv_page_top_status_set_time_label(const char *curr_time)
-{
-    if(top_status_time_label && curr_time)
-    {
-        lv_label_set_text(top_status_time_label,curr_time);
-    }
+//void lv_page_top_status_set_time_label(const char *curr_time)
+//{
+//    if(top_status_time_label && curr_time)
+//    {
+//				//rt_kprintf("lv_page top status set time %s\n",curr_time);
+//        lv_label_set_text(top_status_time_label,curr_time);
+//    }
+//		else
+//		{
+//			rt_kprintf("lv_page top status set time error \n");
+//		}
 
-}
+//}
 
 void lv_page_top_status_set_location_label(const char *location_str)
 {

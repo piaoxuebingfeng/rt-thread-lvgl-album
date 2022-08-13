@@ -12,7 +12,7 @@
 
 #define MATH_PI 3.1415926535897932384626433832795
 
-void lv_sun_canvas_test(lv_obj_t *parent);
+void lv_sun_canvas_create(lv_obj_t *parent);
 
 void lv_sun_set_position(int sun_ang);
 void lv_sun_canvas_set_text(const char *sun_on_time_text,const char *sun_off_time_text);

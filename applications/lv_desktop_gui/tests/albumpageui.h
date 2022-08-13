@@ -38,6 +38,20 @@ LV_IMG_DECLARE(ui_img_seaandsky800_png);    // assets\seaandsky800.png
 
 
 
+typedef struct imgs_mgt_s imgs_mgt_t;
+
+struct imgs_mgt_s
+{
+	int imgs_count;
+	int imgs_total_nums;
+	char *imgs_path;
+	char *imgs_lvgl_path;
+	
+	imgs_mgt_t *next;
+};
+
+
+
 
 void ui_init(void);
 void ui_albumpage_screen_init(lv_obj_t *parent);
@@ -48,6 +62,8 @@ void imgs_set_current_img_node_head();
 void lv_albumpage_auto_update();
 void imgs_list_deinit();
 void imgs_list_show();
+
+
 
 
 #ifdef __cplusplus

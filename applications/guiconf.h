@@ -17,6 +17,7 @@ struct guiconf_s {
 	char wifi_ssid[CONF_STR_MIN_LEN];
 	char wifi_passwd[CONF_STR_MIN_LEN];
 	char apikey[CONF_STR_MAX_LEN];
+	char cityid[CONF_STR_MIN_LEN];
 };
 
 
@@ -28,6 +29,7 @@ extern  guiconf_t guiconf_global;
 
 void guiconf_set_wifissid(guiconf_t *guiconf,const char *wifissid);
 void guiconf_set_wifipasswd(guiconf_t *guiconf,const char *wifipasswd);
+void guiconf_set_cityid(guiconf_t *guiconf,const char *cityid);
 
 void guiconf_read(guiconf_t *guiconf);
 void guiconf_print(guiconf_t *guiconf);

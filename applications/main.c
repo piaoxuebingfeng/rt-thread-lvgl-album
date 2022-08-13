@@ -35,7 +35,7 @@
 #include"my_desktop_page_mgt_test.h"
 #include "newspageui.h"
 #include "albumpageui.h"
-
+#include "weatherpageui.h"
 #include "guiconf.h"  
 
 #include "dfs.h"
@@ -50,12 +50,6 @@
 #include <rtdbg.h>
 
 
-
-int lv_gui_update(const char *news_uri);
-
-
-
-
 /* defined the LED1 pin: PG6 */
 #define LED1_PIN    GET_PIN(G, 6)  // green led
 #define LED2_PIN    GET_PIN(D, 4)  // orange 
@@ -67,14 +61,6 @@ static rt_bool_t loop_check_network(void);
 
 extern int webclient_get_news(const char* URI);
 
-
-// �Զ����ʼ������
-
-//#define INIT_APP_EXPORT(fn)             INIT_EXPORT(fn, "6")
-// ���ԣ���Ҳ����ֱ����INIT_EXPORT�����Ƶȼ������������"6.1", "6.2"�ȵ�
-
-//INIT_APP_EXPORT(stm32_sdcard_mount);
-//INIT_APP_EXPORT(esp32_device_register);
 extern void stm32_sdcard_mount(void);
 extern int esp32_device_register(void);
 extern int lvgl_demo_init(void);
@@ -105,40 +91,35 @@ int main(void)
 		rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
 //		int i2c1_scl_pn ;
 //		int i2c1_sda_pn ;
-		const char *news_uri_base="http://api.tianapi.com/bulletin/index?key=";
-		char news_uri[200]={0};
+
 
 	
 	
 //		i2c1_scl_pn = rt_pin_get("PB.8");
 //		i2c1_sda_pn = rt_pin_get("PB.9");
-//	
 //		rt_kprintf("test gpio pin\r\n");
-//	
 //		rt_kprintf("i2c1_scl_pn %d i2c1_sda_pn  %d\r\n",i2c1_scl_pn, i2c1_sda_pn );
 	
 
 		rtt_app_init();
 		
-		
-		rt_memset(news_uri,0,200);
-		rt_sprintf(news_uri,"%s%s",news_uri_base,guiconf_global.apikey);
-		
-		//LOG_I("news_uri is %s\n",news_uri);
-		
-		if(loop_check_network())
-		{
-
-			webclient_get_news(news_uri);
-		}
 
 		
 		news_list_init();
 		
+		
+		weather_info_init();
+		
+		
 		// just test
+		//weather_info_print();
+		
 		imgs_list_init();
 		imgs_set_current_img_node_head();
 //		imgs_list_show();
+
+		minimgs_list_init();
+		minimgs_set_current_img_node_head();
     while (1)
     {
         rt_pin_write(LED1_PIN, PIN_HIGH);
@@ -147,7 +128,6 @@ int main(void)
         rt_pin_write(LED1_PIN, PIN_LOW);
 				rt_pin_write(LED2_PIN, PIN_HIGH);
         rt_thread_mdelay(450);
-//				lv_gui_update(news_uri);
 			
 			lv_desktop_gui_page_update();
     }
@@ -155,20 +135,8 @@ int main(void)
 		news_list_deinit();
 		
 		imgs_list_deinit();
+		minimgs_list_deinit();
 }
-
-
-
-
-
-
-// gui update
-// ��ʱ���� gui ����
-
-// ʱ����� ��ͼƬ���� �����Ÿ���
-
-// ����״̬���� 
-
 
 
 
@@ -183,82 +151,40 @@ static rt_bool_t loop_check_network(void)
 }
 
 
-
-
-
-int lv_gui_update(const char *news_uri)
+static struct rt_work network_info_sync_work;
+static void network_info_sync_work_func(struct rt_work *work, void *work_data)
 {
-	char clocktime[10]={0};   
-	time_t now;
-	struct tm *p;
-	now = time(RT_NULL);
-	p = localtime(&now); 
-	static int news_show_count =0;
-	news_t *news_p = news_head;
-	news_t *news_q =news_p;
-	lv_obj_t *cur_scr ;
-	
-		//�жϵ�ǰҳ�����ĸ�ҳ�棬Ȼ�����������
-	
-		cur_scr = lv_scr_act();
-		if(cur_scr)
-		{
+		char weather_uri[200]={0};
+    if (loop_check_network())
+    {		
+			extern int webclient_get_file(const char* URI, const char* filename);
 			
-		}
-		if(loop_check_network())
-		{
-
-			if(p)
-			{
-
-				rt_snprintf(clocktime,10,"%02d:%02d",p->tm_hour,p->tm_min);
-//				// ����ʱ��
-//				lv_clock_set_time(clocktime);
-				lv_clock_label_update(p->tm_hour,p->tm_min,p->tm_sec);
-//				// ��������
-//				lv_clock_calendar_set_date(p->tm_year+1900, p->tm_mon+1, p->tm_mday);
-				
-				if( p->tm_hour >7 && p->tm_hour < 23 && p->tm_min!=0 &&  p->tm_min %50==0 && p->tm_sec!=0 && p->tm_sec%50==0)
-				{
-					LOG_I("update news\r\n");
-					webclient_get_news(news_uri);
-					
-					LOG_I("news list update \r\n");
-					news_list_deinit();
-					news_list_init();
-					news_show_count =0 ;
-					news_p = news_head;
-					news_q = news_p;
-					
-				}
-				if(p->tm_sec %30 ==0)
-				{
-					while(news_q && (news_q->news_list_count !=news_show_count))
-					{
-						news_q = news_q->next;
-					}
-					if(news_q->news_list_count == news_show_count)
-					{
-						LOG_I("[ %d/%d %d:%d:%d ] total news num :%d , current news :%d\n",p->tm_mon+1,p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec,news_q->news_list_num,news_show_count);
-						ui_set_news_title(news_q->news_title);
-						ui_set_news_time(news_q->news_mtime);
-						ui_set_news_digest(news_q->news_digest);
-						news_show_count++;
-						if(news_show_count >= news_q->news_list_num)
-						{
-							news_show_count = 0;
-						}
-					}
-				}
-			}	
-		}
-		else
-		{
-////			rt_kprintf("network is not link up\n");
-		}
-
-	return 0;
+			news_str_update();
+			
+			rt_kprintf("news info update success\n");
+			
+			rt_memset(weather_uri,0,200);
+			rt_sprintf(weather_uri,"%s%s","http://t.weather.sojson.com/api/weather/city/",guiconf_global.cityid);
+			webclient_get_file(weather_uri,"/tmp/weather");
+			weather_info_init();
+			
+			rt_kprintf("weather info update success\n");
+      //rt_work_submit(work, rt_tick_from_millisecond(3600 * 1000));		
+    }
+    else
+    {
+        rt_work_submit(work, rt_tick_from_millisecond(5 * 1000));
+    }
 }
+
+static int network_info_auto_sync_init(void)
+{
+    rt_work_init(&network_info_sync_work, network_info_sync_work_func, RT_NULL);
+    rt_work_submit(&network_info_sync_work, rt_tick_from_millisecond(40 * 1000));
+    return RT_EOK;
+}
+INIT_COMPONENT_EXPORT(network_info_auto_sync_init);
+
 
 
 

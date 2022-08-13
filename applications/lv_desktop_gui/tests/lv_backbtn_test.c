@@ -1,5 +1,6 @@
 #include <lvgl.h>
 #include "lv_backbtn_test.h"
+#include "albumpageui.h"
 
 // just test
 #include"my_desktop_page_mgt_test.h"
@@ -129,7 +130,6 @@ static void lv_backbtn_menu_create(desktop_menubtn_t *dm_t);
 
 static void lv_desktop_img_show_create(lv_obj_t *parent);
 static void lv_desktop_bottom_menu_create(lv_obj_t *parent);
-void clocktime_update_timer_task_init(void);
 
 
 
@@ -159,7 +159,8 @@ void lv_desktop_backbtn_test(lv_obj_t * page)
     // 使用 c 数组设置
 
     lv_obj_t * bg_img = lv_img_create(desktop);
-    lv_img_set_src(bg_img, &bg_lvgl);
+//  lv_img_set_src(bg_img, &bg_lvgl);
+		lv_img_set_src(bg_img, &ui_img_testbg_png);
 		lv_obj_align(bg_img, LV_ALIGN_CENTER, 0, 0);
 	// lv_obj_fade_in(desktop,0, delay);
 #endif
@@ -177,10 +178,6 @@ void lv_desktop_backbtn_test(lv_obj_t * page)
 
     // 桌面悬浮球测试
 //    lv_desktop_backbtn_create(desktop);
-
-
-
-
     lv_style_init(&label_time_style);
 //    lv_style_set_text_opa(&label_time_style, LV_OPA_COVER);
     lv_style_set_text_color(&label_time_style, lv_color_hex(0xF4AA56));
@@ -219,11 +216,6 @@ void lv_desktop_backbtn_test(lv_obj_t * page)
 		// 创建底部 app 菜单栏
 		lv_desktop_bottom_menu_create(desktop);
 
-
-		
-		//界面更新统一管理
-		//根据当前显示的界面进行更新
-		//clocktime_update_timer_task_init();
 }
 
 
@@ -300,7 +292,7 @@ void desktopmainpage_update()
 {
 	char clocktime[10]={0};  
 	static uint8_t img_i=0;
-	static char *desktop_imgsrc_path[2]={"S:imgs/tiger.jpg","S:imgs/esp32show.jpg"};	
+//	static char *desktop_imgsrc_path[2]={"S:minimgs/tiger.jpg","S:minimgs/esp32show.jpg"};	
 	time_t now;
 	struct tm *p;
 	/* output current time */
@@ -324,12 +316,13 @@ void desktopmainpage_update()
 		// 更新照片
 		if(p->tm_sec %15==0)
 		{
-			desktop_img_switch(desktop_imgsrc_path[img_i]);
-			img_i++;
-			if(img_i==2)
-			{
-				img_i=0;
-			}
+//			desktop_img_switch(desktop_imgsrc_path[img_i]);
+//			img_i++;
+//			if(img_i==2)
+//			{
+//				img_i=0;
+//			}
+			lv_minimgs_auto_update();
 		}
 	}
 }
@@ -364,18 +357,6 @@ void clocktime_update_timer_cb(lv_timer_t * timer)
 		}
 }
 
-void clocktime_update_timer_task_init(void)
-{
-    static uint32_t timer_delay = 1000; // 1s
-    static uint32_t user_data = 0;
-    lv_timer_t *imgscr_timer = lv_timer_create(clocktime_update_timer_cb,timer_delay,&user_data);
-		// lv_timer_del(imgscr_timer)
-}
-
-
-
-
-
 static lv_obj_t * desktop_img_cond ;
 static lv_obj_t *desktop_imgshow;
 
@@ -399,7 +380,7 @@ static void lv_desktop_img_show_create(lv_obj_t *parent)
 //    lv_obj_set_style_flex_main_place(desktop_img_cond,LV_FLEX_ALIGN_SPACE_EVENLY,LV_STATE_DEFAULT);
 		
     desktop_imgshow = lv_img_create(desktop_img_cond);
-    lv_img_set_src(desktop_imgshow,"S:imgs/esp32show.jpg");
+//    lv_img_set_src(desktop_imgshow,"S:minimgs/esp32show.jpg");
     lv_obj_center(desktop_imgshow);
 		
 }
@@ -411,6 +392,189 @@ static void img_opa_anim_cb(void * var, int32_t v)
     lv_obj_set_style_opa(var,v,LV_STATE_DEFAULT);
 }
 
+
+
+// minimgs
+static imgs_mgt_t *minimgs_list_head = RT_NULL;
+static imgs_mgt_t *minimgs_current_show = RT_NULL;
+static uint32_t minimg_show_count =1;
+
+
+// 读取 SD 卡中图片信息，整理成一个列表，提供给 minimgs 后续使用
+void minimgs_list_init()
+{
+	imgs_mgt_t *imgs_list_p = RT_NULL;	
+	imgs_mgt_t *imgs_list_q = RT_NULL;	
+	DIR *dirp;
+	struct dirent *d;
+	int imgs_count =0;
+	int imgs_total_nums =0;
+	int len=0;
+	
+
+	/* 打开 / dir_test 目录 */
+	dirp = opendir("/minimgs");
+	if (dirp == RT_NULL)
+	{
+			rt_kprintf("open directory error!\n");
+	}
+	else
+	{
+			
+			/* 读取目录 */
+			while ((d = readdir(dirp)) != RT_NULL)
+			{
+				imgs_total_nums++;
+			}
+			/* 关闭目录 */
+			closedir(dirp);
+	}
+	
+	rt_kprintf("minimgs total nums :%d\n",imgs_total_nums);
+	
+	dirp = opendir("/minimgs");
+	if (dirp == RT_NULL)
+	{
+			rt_kprintf("open directory error!\n");
+	}
+	else
+	{
+			
+			/* 读取目录 */
+			while ((d = readdir(dirp)) != RT_NULL)
+			{
+				len = rt_strlen(d->d_name);
+				imgs_list_p = (imgs_mgt_t *)rt_malloc(sizeof(imgs_mgt_t));
+				if(imgs_list_p== RT_NULL)
+				{
+					rt_kprintf("imgs_list_p malloc fail\n");
+					goto __exit ;
+				}
+				// 插入图片名称
+				imgs_list_p->imgs_path = (char *)rt_malloc(sizeof(char)*len+10);
+				if(imgs_list_p->imgs_path== RT_NULL)
+				{
+					rt_kprintf("imgs_path malloc fail\n");
+					goto __exit ;
+				}
+				imgs_list_p->imgs_lvgl_path = (char *)rt_malloc(sizeof(char)*len+10);
+				if(imgs_list_p->imgs_lvgl_path== RT_NULL)
+				{
+					rt_kprintf("imgs_lvgl_path malloc fail\n");
+					goto __exit ;
+				}			
+				
+				rt_sprintf(imgs_list_p->imgs_path,"/minimgs/%s",d->d_name);
+				rt_sprintf(imgs_list_p->imgs_lvgl_path,"S:minimgs/%s",d->d_name);
+				imgs_count++;
+				imgs_list_p->imgs_count      =  imgs_count;
+				imgs_list_p->imgs_total_nums =  imgs_total_nums;
+				imgs_list_p->next = RT_NULL;
+				rt_kprintf("[%d/%d] %s  \n",imgs_list_p->imgs_count,imgs_list_p->imgs_total_nums,imgs_list_p->imgs_path );
+
+				// 向链表中新增节点
+				if(minimgs_list_head == RT_NULL)
+				{
+					minimgs_list_head = imgs_list_p;
+					imgs_list_q = minimgs_list_head;					
+				}
+				else
+				{
+					while(imgs_list_q->next!=RT_NULL)
+					{
+						imgs_list_q = imgs_list_q->next;
+					}
+					imgs_list_q->next = imgs_list_p;
+				}
+			}
+			/* 关闭目录 */
+			closedir(dirp);
+			return ;
+	}
+	
+	
+__exit:
+	imgs_list_deinit();
+	if(dirp)
+	{
+		closedir(dirp);
+	}
+}
+
+
+void minimgs_set_current_img_node_head()
+{
+	if(minimgs_list_head)
+	{
+		minimgs_current_show = minimgs_list_head;
+	}
+}
+
+
+void minimgs_list_show()
+{
+	imgs_mgt_t *imgs_list_p = minimgs_list_head;
+	imgs_mgt_t *imgs_list_q= imgs_list_p;
+	
+	if(imgs_list_q != RT_NULL)
+	{
+		//while(imgs_list_q  && imgs_list_q->next!=RT_NULL)
+		rt_kprintf("minimgs show \n");
+		while(imgs_list_q)
+		{
+			rt_kprintf("[%d/%d]   %s  \n",imgs_list_q->imgs_count,imgs_list_q->imgs_total_nums,imgs_list_q->imgs_lvgl_path);
+			imgs_list_q = imgs_list_q->next;
+		}
+	}
+}
+
+
+void lv_minimgs_auto_update()
+{
+	if(minimgs_current_show != RT_NULL)
+	{
+		if(minimgs_current_show->imgs_lvgl_path)
+		{
+			rt_kprintf("[%d/%d]   %s  \n",minimgs_current_show->imgs_count,minimgs_current_show->imgs_total_nums,minimgs_current_show->imgs_lvgl_path);
+//			lv_img_set_src(desktop_imgshow, minimgs_current_show->imgs_lvgl_path);
+			desktop_img_switch(minimgs_current_show->imgs_lvgl_path);
+			minimgs_current_show = minimgs_current_show->next;
+			if(minimgs_current_show == RT_NULL)
+			{
+				minimgs_current_show = minimgs_list_head;
+			}
+		}
+	}
+	
+}
+
+
+
+
+void minimgs_list_deinit()
+{
+	imgs_mgt_t *imgs_list_p = minimgs_list_head;
+	imgs_mgt_t *imgs_list_q= RT_NULL;
+	
+	if(imgs_list_p != RT_NULL)
+	{
+		while(imgs_list_p)
+		{
+			imgs_list_q = imgs_list_p->next;
+			if(imgs_list_p->imgs_path)
+			{
+				rt_free(imgs_list_p->imgs_path);
+			}
+			if(imgs_list_p->imgs_lvgl_path)
+			{
+				rt_free(imgs_list_p->imgs_lvgl_path);
+			}
+			rt_free(imgs_list_p);	
+			imgs_list_p = imgs_list_q;
+		}
+		minimgs_list_head = RT_NULL;
+	}
+}
 
 
 void desktop_img_switch(const char *imgsrc)
@@ -429,9 +593,9 @@ void desktop_img_switch(const char *imgsrc)
 			lv_anim_set_exec_cb(&a2, img_opa_anim_cb);
 			lv_anim_set_values(&a2, 0, 255);
 			lv_anim_set_delay(&a2,1000);
-			lv_anim_set_time(&a2, 2000);
+			lv_anim_set_time(&a2, 1000);
 			lv_anim_set_playback_delay(&a2, 10000);
-			lv_anim_set_playback_time(&a2, 2000);
+			lv_anim_set_playback_time(&a2, 1000);
 			lv_anim_start(&a2);
 		}
 }

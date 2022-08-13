@@ -27,6 +27,12 @@ void lv_submenu_create(desktop_menubtn_t *dm_t);
 void lv_submenu_clear(desktop_menubtn_t *dm_t);
 
 
+void minimgs_list_init();
+void minimgs_set_current_img_node_head();
+void minimgs_list_deinit();
+void minimgs_list_show();
+void lv_minimgs_auto_update();
+
 void desktopmainpage_update();
 
 void desktop_img_switch(const char *imgsrc);

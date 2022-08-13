@@ -302,7 +302,7 @@ int at_obj_exec_cmd(at_client_t client, at_response_t resp, const char *cmd_expr
     }
 
     /* check AT CLI mode */
-    if (client->status == AT_STATUS_CLI && resp)
+    if (client->status == AT_STATUS_CLI && resp==RT_NULL)
     {
         return -RT_EBUSY;
     }

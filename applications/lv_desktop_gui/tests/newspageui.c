@@ -529,7 +529,7 @@ void ui_news_page_screen_init(lv_obj_t *parent)
     lv_obj_set_style_bg_color(ui_newspanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_newspanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_newspanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_opa(ui_newspanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_newspanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_newspanel, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_newstitle
@@ -608,5 +608,7 @@ void ui_news_page_screen_init(lv_obj_t *parent)
     lv_obj_set_style_text_opa(ui_newslabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_newslabel, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+
+		news_show_update();
 }
 

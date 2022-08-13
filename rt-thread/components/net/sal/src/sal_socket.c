@@ -297,8 +297,13 @@ int sal_check_netdev_internet_up(struct netdev *netdev)
     }
 
     rt_work_init(net_work, check_netdev_internet_up_work, (void *)netdev);
+		
+
     rt_work_submit(net_work, RT_TICK_PER_SECOND);
+#else
+	netdev_low_level_set_internet_status(netdev, RT_TRUE);
 #endif /* SAL_INTERNET_CHECK */
+		
     return 0;
 }
 

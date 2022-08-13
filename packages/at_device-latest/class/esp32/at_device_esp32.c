@@ -601,8 +601,7 @@ static void esp32_netdev_start_delay_work(struct at_device *device)
 }
 
 
-// esp32 wifi ɨ��
-// scan_res ����ɨ����
+
 static void esp32_wifi_scan(struct at_device *device ,void *scan_res)
 {
 	if(device ==RT_NULL || scan_res == RT_NULL)
@@ -611,20 +610,37 @@ static void esp32_wifi_scan(struct at_device *device ,void *scan_res)
 	struct at_client *client = device->client;
 	at_response_t resp = RT_NULL;
 	rt_err_t result = RT_EOK;
-	// ִ�� esp32 wifi scan at ָ��
-	// ����ɨ����
-	
-	//���50��
-	resp = at_create_resp(128*50, 50, 5 * RT_TICK_PER_SECOND);
+
+//	#define AT_SEND_CMD(client, resp, cmd)                                     \
+//    do {                                                                   \
+//        (resp) = at_resp_set_info((resp), 256, 0, 5 * RT_TICK_PER_SECOND); \
+//        if (at_obj_exec_cmd((client), (resp), (cmd)) < 0)                  \
+//        {                                                                  \
+//            result = -RT_ERROR;                                            \
+//            goto __exit;                                                   \
+//        }                                                                  \
+//    } while(0)                                                             \
+
+	resp = at_create_resp(256, 20, 5 * RT_TICK_PER_SECOND);
 	if (resp == RT_NULL)
 	{
 			LOG_E("no memory for at client resp create.");
 			return;
 	}
+	LOG_I("sent at cmd AT+CWLAPOPT=1,31,-90,0x0FC\n");
 	
 	AT_SEND_CMD(client, resp, "AT+CWLAPOPT=1,31,-90,0x0FC");
 	rt_thread_mdelay(1000);
-	AT_SEND_CMD(client, resp, "AT+CWLAP");
+	at_delete_resp(resp);
+	
+	resp = at_create_resp(5120, 20, 20 * RT_TICK_PER_SECOND);
+	LOG_I("sent at cmd AT+CWLAP \n");
+	//AT_SEND_CMD(client, resp, "AT+CWLAP");
+	if (at_obj_exec_cmd((client), (resp), ("AT+CWLAP")) < 0)                  
+	{
+		LOG_E("wifi scan cmd exec error\n");
+		goto __exit;                                                   
+	} 
 	rt_thread_mdelay(3000);
 	
 	if(resp->buf)
@@ -632,6 +648,7 @@ static void esp32_wifi_scan(struct at_device *device ,void *scan_res)
 		LOG_I("wifi scan results\n");
 		LOG_I("scan line counts :%d\n",resp->line_counts);
 		LOG_I("scan line numbers :%d\n",resp->line_num);
+		LOG_I("resp buf len %d",rt_strlen(resp->buf));
 		LOG_I("%s",resp->buf);
 		
 	}
@@ -681,7 +698,7 @@ static void esp32_init_thread_entry(void *parameter)
         rt_thread_mdelay(1000);
         /* disable echo */
         AT_SEND_CMD(client, resp, "ATE0");
-				rt_thread_mdelay(500);
+        rt_thread_mdelay(500);
         /* set current mode to Wi-Fi station */
         AT_SEND_CMD(client, resp, "AT+CWMODE=1");
         /* get module version */

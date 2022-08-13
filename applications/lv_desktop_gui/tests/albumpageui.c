@@ -8,25 +8,17 @@
 //---------------------------------------------------------------------------------------------------------
 
 
-typedef struct imgs_mgt_s imgs_mgt_t;
-
-struct imgs_mgt_s
-{
-	int imgs_count;
-	int imgs_total_nums;
-	char *imgs_path;
-	char *imgs_lvgl_path;
-	
-	imgs_mgt_t *next;
-};
-
+// imgs
 imgs_mgt_t *imgs_list_head = RT_NULL;
 static imgs_mgt_t *imgs_current_show = RT_NULL;
 static uint32_t img_show_count =1;
 
-void imgs_list_init();
-void imgs_list_deinit();
-void imgs_list_show();
+
+
+
+
+
+
 //---------------------------------------------------------------------------------------------------------
 
 
@@ -61,7 +53,7 @@ const static void *norflashimgname[]={&bg_lvgl,&ui_img_testbg_png,&ui_img_seaand
 void imganmitoleft()
 {
     imgswitch_c++;
-    if(imgswitch_c==5)
+    if(imgswitch_c==3)
     {
         imgswitch_c=0;
     }
@@ -73,7 +65,7 @@ void imganmitoright()
 {
     if(imgswitch_c==0)
     {
-        imgswitch_c =4;
+        imgswitch_c =2;
     }
     else if(imgswitch_c >0)
     {
@@ -166,6 +158,7 @@ void ui_albumpage_screen_init(lv_obj_t *parent)
     lv_obj_set_style_radius(ui_btnleft, 40, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_color(ui_btnleft, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_opa(ui_btnleft, 50, LV_PART_MAIN | LV_STATE_PRESSED);
+		lv_obj_set_style_shadow_width(ui_btnleft,0,LV_PART_MAIN | LV_STATE_DEFAULT);
 		
 
     // ui_Labbtnleft
@@ -206,6 +199,7 @@ void ui_albumpage_screen_init(lv_obj_t *parent)
     lv_obj_set_style_radius(ui_btnswitch, 40, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_color(ui_btnswitch, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_opa(ui_btnswitch, 50, LV_PART_MAIN | LV_STATE_PRESSED);
+		lv_obj_set_style_shadow_width(ui_btnswitch,0,LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_Labbtnswitch
 
@@ -237,6 +231,7 @@ void ui_albumpage_screen_init(lv_obj_t *parent)
     lv_obj_set_style_radius(ui_btnright, 40, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_color(ui_btnright, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_opa(ui_btnright, 50, LV_PART_MAIN | LV_STATE_PRESSED);
+		lv_obj_set_style_shadow_width(ui_btnright,0,LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_Labbtnright
 
@@ -441,9 +436,6 @@ void imgs_list_deinit()
 		imgs_list_head = RT_NULL;
 	}
 }
-
-
-
 
 // read imgs name 
 

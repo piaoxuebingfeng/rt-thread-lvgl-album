@@ -259,19 +259,15 @@ static void lv_100ask_2048_event(const lv_obj_class_t * class_p, lv_event_t * e)
             switch(lv_indev_get_gesture_dir(lv_indev_get_act()))
             {
                 case LV_DIR_TOP:
-										rt_kprintf("move left LV_DIR_TOP\n");
                     success = move_left(&(game_2048->score), game_2048->matrix);
                     break;
                 case LV_DIR_BOTTOM:
-										rt_kprintf("move right LV_DIR_BOTTOM\n");
                     success = move_right(&(game_2048->score), game_2048->matrix);
                     break;
                 case LV_DIR_LEFT:
-										rt_kprintf("move up LV_DIR_LEFT\n");
                     success = move_up(&(game_2048->score), game_2048->matrix);
                     break;
                 case LV_DIR_RIGHT:
-										rt_kprintf("move down LV_DIR_RIGHT\n");
                     success = move_down(&(game_2048->score), game_2048->matrix);
                     break;
                 default: break;

@@ -29,25 +29,7 @@ static rt_uint8_t lvgl_thread_stack[LV_THREAD_STACK_SIZE];
 
 static void lvgl_entry(void *parameter)
 {
-//    extern void lv_demo_music(void);
-//    lv_demo_music();
-
-	
-		
-		rt_kprintf("start lvgl demo test\r\n");
-	
-//		extern void lv_desktop(void);
-//		lv_desktop();
-	
-//		extern void lv_desktop_backbtn_test(void);
-//		lv_desktop_backbtn_test();
-//		extern void clocktime_update_timer_task_init(void);
-//		clocktime_update_timer_task_init();
-
-//	lv_100ask_sketchpad_simple_test();
-//		lv_100ask_calc_simple_test();
-	
-//		lv_100ask_page_manager_simple_test();
+		rt_kprintf("start lvgl gui\r\n");
 		lv_my_desktop_page_mgt_test();
     while(1)
     {
@@ -58,10 +40,7 @@ static void lvgl_entry(void *parameter)
 
 int lvgl_demo_init(void)
 {
-    rt_thread_t tid;
-		//等待文件系统挂载完成
-		rt_thread_mdelay(1000);
-  
+    rt_thread_t tid;  
 		rt_thread_init(&lvgl_thread,
                    "LVGL",
                    lvgl_entry,

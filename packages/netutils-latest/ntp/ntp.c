@@ -419,10 +419,21 @@ static rt_bool_t ntp_check_network(void)
 static struct rt_work ntp_sync_work;
 static void ntp_sync_work_func(struct rt_work *work, void *work_data)
 {
+		struct tm *p;
+		time_t current_time;
     if (ntp_check_network())
     {
-        ntp_sync_to_rtc(RT_NULL);
-        rt_work_submit(work, rt_tick_from_millisecond(NTP_AUTO_SYNC_PERIOD * 1000));
+        current_time =ntp_sync_to_rtc(RT_NULL);
+				
+				p = localtime(&current_time); 
+				if(p->tm_year+1900<2022)
+				{
+					rt_work_submit(work, rt_tick_from_millisecond(5 * 1000));
+				}
+				else
+				{
+					rt_work_submit(work, rt_tick_from_millisecond(NTP_AUTO_SYNC_PERIOD * 1000));
+				}
     }
     else
     {
