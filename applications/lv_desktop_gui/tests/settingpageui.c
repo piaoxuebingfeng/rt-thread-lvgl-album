@@ -18,10 +18,17 @@ static lv_obj_t * ui_versionlabel;
 static lv_obj_t * ui_rightpanelwifi;
 static lv_obj_t * ui_wifisetbtn;
 static lv_obj_t * ui_wifisetbtnlabel;
+\
 static lv_obj_t * ui_labelwifissid;
 static lv_obj_t * ui_labwifipasswd;
 static lv_obj_t * ui_textwifissid;
 static lv_obj_t * ui_textwifipassword;
+
+static lv_obj_t * ui_labelcityname;
+static lv_obj_t * ui_labelcityid;
+static lv_obj_t * ui_textcityname;
+static lv_obj_t * ui_textcityid;
+
 static lv_obj_t * ui_Keyboard2;
 
 
@@ -140,6 +147,12 @@ static void ui_Roller2_event_handler(lv_event_t *e)
     }
 }
 
+//static void kb_event_cb(lv_event_t *e)
+//{
+//    lv_event_code_t code = lv_event_get_code(e);
+//    lv_obj_t * obj = lv_event_get_target(e);
+//	
+//}
 
 // text area 事件
 
@@ -151,8 +164,18 @@ static void textarea_event(lv_event_t *e)
         if(ui_Keyboard2)
         {
             lv_keyboard_set_textarea(ui_Keyboard2, obj);
+						lv_obj_clear_flag(ui_Keyboard2, LV_OBJ_FLAG_HIDDEN);
         }
+
     }
+		if(code == LV_EVENT_DEFOCUSED) 
+		{
+			if(ui_Keyboard2)
+			{
+				lv_keyboard_set_textarea(ui_Keyboard2, NULL);
+				lv_obj_add_flag(ui_Keyboard2, LV_OBJ_FLAG_HIDDEN);
+			}
+		}
 }
 
 
@@ -173,6 +196,12 @@ static void wifisetbtn_event(lv_event_t *e)
 
 					LV_LOG_USER("password: %s\n",lv_textarea_get_text(ui_textwifipassword));
 					guiconf_set_wifipasswd(&guiconf_global,lv_textarea_get_text(ui_textwifipassword));
+	
+					LV_LOG_USER("cityname: %s\n",lv_textarea_get_text(ui_textcityname));
+					guiconf_set_cityname(&guiconf_global,lv_textarea_get_text(ui_textcityname));
+					
+					LV_LOG_USER("cityid: %s\n",lv_textarea_get_text(ui_textcityid));
+					guiconf_set_cityid(&guiconf_global,lv_textarea_get_text(ui_textcityid));								
 					
 					guiconf_write(&guiconf_global);
 					
@@ -308,7 +337,7 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     ui_Roller2 = lv_roller_create(ui_leftpanel);
 		lv_obj_set_style_border_width(ui_Roller2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(ui_Roller2,lv_color_make(255,255,255),LV_STATE_DEFAULT);
-    lv_roller_set_options(ui_Roller2, "WIFI\nFONT\nSCANNING\nUPDATE\nSYSTEM\n", LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_options(ui_Roller2, "NETWORK\nFONT\nSCANNING\nUPDATE\nSYSTEM\n", LV_ROLLER_MODE_NORMAL);
 
     lv_obj_set_width(ui_Roller2, 275);
     lv_obj_set_height(ui_Roller2, 425);
@@ -344,6 +373,207 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     lv_obj_set_style_bg_opa(ui_rightpanelwifi, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_rightpanelwifi, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+
+    // ui_labelwifissid
+
+    ui_labelwifissid = lv_label_create(ui_rightpanelwifi);
+
+    lv_obj_set_width(ui_labelwifissid, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_labelwifissid, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_labelwifissid, -178);
+    lv_obj_set_y(ui_labelwifissid, -150);
+
+    lv_obj_set_align(ui_labelwifissid, LV_ALIGN_CENTER);
+
+    lv_label_set_text(ui_labelwifissid, "SSID:");
+
+    lv_obj_set_style_text_color(ui_labelwifissid, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_labelwifissid, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_labelwifissid, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_labwifipasswd
+
+    ui_labwifipasswd = lv_label_create(ui_rightpanelwifi);
+
+    lv_obj_set_width(ui_labwifipasswd, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_labwifipasswd, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_labwifipasswd, -188);
+    lv_obj_set_y(ui_labwifipasswd, -100);
+
+    lv_obj_set_align(ui_labwifipasswd, LV_ALIGN_CENTER);
+
+    lv_label_set_text(ui_labwifipasswd, "PSWD:");
+
+    lv_obj_set_style_text_color(ui_labwifipasswd, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_labwifipasswd, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_labwifipasswd, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_textwifissid
+
+    ui_textwifissid = lv_textarea_create(ui_rightpanelwifi);
+
+    lv_obj_set_width(ui_textwifissid, 300);
+    lv_obj_set_height(ui_textwifissid, 35);
+
+    lv_obj_set_x(ui_textwifissid, 13);
+    lv_obj_set_y(ui_textwifissid, -150);
+
+    lv_obj_set_align(ui_textwifissid, LV_ALIGN_CENTER);
+    lv_textarea_set_placeholder_text(ui_textwifissid, "Your wifi ssid");
+
+    lv_obj_add_state(ui_textwifissid, LV_STATE_CHECKED | LV_STATE_FOCUSED);
+
+    lv_obj_clear_flag(ui_textwifissid, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);
+
+    lv_obj_set_style_text_color(ui_textwifissid, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_textwifissid, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui_textwifissid, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_textwifissid, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_textwifissid, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_textwifissid, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_text_color(ui_textwifissid, lv_color_hex(0xFF0000), LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_textwifissid, 255, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_textwifissid, LV_TEXT_ALIGN_AUTO, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_textwifissid,textarea_event, LV_EVENT_ALL, NULL);
+		lv_textarea_set_text(ui_textwifissid,guiconf_global.wifi_ssid);
+    // ui_textwifipassword
+
+    ui_textwifipassword = lv_textarea_create(ui_rightpanelwifi);
+
+    lv_obj_set_width(ui_textwifipassword, 300);
+    lv_obj_set_height(ui_textwifipassword, 35);
+
+    lv_obj_set_x(ui_textwifipassword, 13);
+    lv_obj_set_y(ui_textwifipassword, -100);
+
+    lv_obj_set_align(ui_textwifipassword, LV_ALIGN_CENTER);
+
+    lv_textarea_set_placeholder_text(ui_textwifipassword, "Your wifi password");
+    //密码 可见时间可以通过 lv_conf.h 中的 LV_TEXTAREA_DEF_PWD_SHOW_TIME  进行调整
+    lv_textarea_set_password_mode(ui_textwifipassword, true);  // 密码模式
+    lv_obj_clear_flag(ui_textwifipassword,
+                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
+                      
+    lv_obj_set_style_text_color(ui_textwifipassword, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_textwifipassword, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui_textwifipassword, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_textwifipassword, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_textwifipassword, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_textwifipassword, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    
+    lv_obj_set_style_text_color(ui_textwifipassword, lv_color_hex(0xFF0000), LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_textwifipassword, 255, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_textwifipassword, LV_TEXT_ALIGN_AUTO, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_textwifipassword,textarea_event, LV_EVENT_ALL, NULL);
+		lv_textarea_set_text(ui_textwifipassword,guiconf_global.wifi_passwd);
+
+
+
+    // ui_labelcityname
+
+    ui_labelcityname = lv_label_create(ui_rightpanelwifi);
+
+    lv_obj_set_width(ui_labelcityname, 100);
+    lv_obj_set_height(ui_labelcityname, 35);
+
+    lv_obj_set_x(ui_labelcityname, -178);
+    lv_obj_set_y(ui_labelcityname, -45);
+
+    lv_obj_set_align(ui_labelcityname, LV_ALIGN_CENTER);
+		lv_obj_set_style_text_font(ui_labelcityname, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_label_set_text(ui_labelcityname, "  城市:");
+
+    lv_obj_set_style_text_color(ui_labelcityname, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_labelcityname, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
+    // ui_labelcityid
+
+    ui_labelcityid = lv_label_create(ui_rightpanelwifi);
+
+    lv_obj_set_width(ui_labelcityid, 100);
+    lv_obj_set_height(ui_labelcityid, 35);
+
+    lv_obj_set_x(ui_labelcityid, -178);
+    lv_obj_set_y(ui_labelcityid, 5);
+
+    lv_obj_set_align(ui_labelcityid, LV_ALIGN_CENTER);
+		lv_obj_set_style_text_font(ui_labelcityid, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_label_set_text(ui_labelcityid, "城市ID:");
+
+    lv_obj_set_style_text_color(ui_labelcityid, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_labelcityid, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
+    // ui_textcityname
+
+    ui_textcityname = lv_textarea_create(ui_rightpanelwifi);
+
+    lv_obj_set_width(ui_textcityname, 300);
+    lv_obj_set_height(ui_textcityname, 35);
+
+    lv_obj_set_x(ui_textcityname, 13);
+    lv_obj_set_y(ui_textcityname, -50);
+
+    lv_obj_set_align(ui_textcityname, LV_ALIGN_CENTER);
+    lv_textarea_set_placeholder_text(ui_textcityname, "Your cityname");
+
+//    lv_obj_add_state(ui_textcityname, LV_STATE_CHECKED | LV_STATE_FOCUSED);
+
+    lv_obj_clear_flag(ui_textcityname, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);
+
+    lv_obj_set_style_text_color(ui_textcityname, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_textcityname, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui_textcityname, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_textcityname, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_textcityname, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_textcityname, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_text_color(ui_textcityname, lv_color_hex(0xFF0000), LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_textcityname, 255, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_textcityname, LV_TEXT_ALIGN_AUTO, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_textcityname,textarea_event, LV_EVENT_ALL, NULL);
+		lv_textarea_set_text(ui_textcityname,guiconf_global.cityname);
+		
+    // ui_textcityid
+
+    ui_textcityid = lv_textarea_create(ui_rightpanelwifi);
+
+    lv_obj_set_width(ui_textcityid, 300);
+    lv_obj_set_height(ui_textcityid, 35);
+
+    lv_obj_set_x(ui_textcityid, 13);
+    lv_obj_set_y(ui_textcityid, 0);
+
+    lv_obj_set_align(ui_textcityid, LV_ALIGN_CENTER);
+    lv_textarea_set_placeholder_text(ui_textcityid, "Your cityid");
+    lv_obj_clear_flag(ui_textcityid, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);
+
+    lv_obj_set_style_text_color(ui_textcityid, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_textcityid, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui_textcityid, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_textcityid, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_textcityid, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_textcityid, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_text_color(ui_textcityid, lv_color_hex(0xFF0000), LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_textcityid, 255, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_textcityid, LV_TEXT_ALIGN_AUTO, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_textcityid,textarea_event, LV_EVENT_ALL, NULL);
+		lv_textarea_set_text(ui_textcityid,guiconf_global.cityid);
+
     // ui_wifisetbtn
 
     ui_wifisetbtn = lv_btn_create(ui_rightpanelwifi);
@@ -352,7 +582,7 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     lv_obj_set_height(ui_wifisetbtn, 50);
 
     lv_obj_set_x(ui_wifisetbtn, 0);
-    lv_obj_set_y(ui_wifisetbtn, -50);
+    lv_obj_set_y(ui_wifisetbtn, 50);
 
     lv_obj_set_align(ui_wifisetbtn, LV_ALIGN_CENTER);
 
@@ -377,135 +607,25 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
     lv_obj_set_y(ui_wifisetbtnlabel, 0);
 
     lv_obj_set_align(ui_wifisetbtnlabel, LV_ALIGN_CENTER);
+		lv_obj_set_style_text_font(ui_wifisetbtnlabel, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_label_set_text(ui_wifisetbtnlabel, "Setting");
+    lv_label_set_text(ui_wifisetbtnlabel, "设置");
 
     lv_obj_set_style_text_color(ui_wifisetbtnlabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_wifisetbtnlabel, 250, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_labelwifissid
 
-    ui_labelwifissid = lv_label_create(ui_rightpanelwifi);
 
-    lv_obj_set_width(ui_labelwifissid, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_labelwifissid, LV_SIZE_CONTENT);
 
-    lv_obj_set_x(ui_labelwifissid, -178);
-    lv_obj_set_y(ui_labelwifissid, -150);
-
-    lv_obj_set_align(ui_labelwifissid, LV_ALIGN_CENTER);
-
-    lv_label_set_text(ui_labelwifissid, "SSID:");
-
-    lv_obj_set_style_text_color(ui_labelwifissid, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_labelwifissid, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_labelwifissid, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    // ui_labwifipasswd
-
-    ui_labwifipasswd = lv_label_create(ui_rightpanelwifi);
-
-    lv_obj_set_width(ui_labwifipasswd, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_labwifipasswd, LV_SIZE_CONTENT);
-
-    lv_obj_set_x(ui_labwifipasswd, -188);
-    lv_obj_set_y(ui_labwifipasswd, -112);
-
-    lv_obj_set_align(ui_labwifipasswd, LV_ALIGN_CENTER);
-
-    lv_label_set_text(ui_labwifipasswd, "PSWD:");
-
-    lv_obj_set_style_text_color(ui_labwifipasswd, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_labwifipasswd, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_labwifipasswd, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    // ui_textwifissid
-
-    ui_textwifissid = lv_textarea_create(ui_rightpanelwifi);
-
-    lv_obj_set_width(ui_textwifissid, 300);
-    lv_obj_set_height(ui_textwifissid, 40);
-
-    lv_obj_set_x(ui_textwifissid, 13);
-    lv_obj_set_y(ui_textwifissid, -151);
-
-    lv_obj_set_align(ui_textwifissid, LV_ALIGN_CENTER);
-
-    // lv_obj_add_state(ui_textwifissid, LV_STATE_FOCUSED); 
-
-    // if("" == "") lv_textarea_set_accepted_chars(ui_textwifissid, NULL);
-    // else lv_textarea_set_accepted_chars(ui_textwifissid, "");
-
-    lv_textarea_set_text(ui_textwifissid, "");
-    lv_textarea_set_placeholder_text(ui_textwifissid, "Your wifi ssid");
-
-    lv_obj_add_state(ui_textwifissid, LV_STATE_CHECKED | LV_STATE_FOCUSED);
-
-    lv_obj_clear_flag(ui_textwifissid, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
-                      LV_OBJ_FLAG_SCROLL_CHAIN);
-
-    lv_obj_set_style_text_color(ui_textwifissid, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_textwifissid, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(ui_textwifissid, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_textwifissid, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_textwifissid, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_textwifissid, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    lv_obj_set_style_text_color(ui_textwifissid, lv_color_hex(0xFF0000), LV_STATE_FOCUSED | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_textwifissid, 255, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_textwifissid, LV_TEXT_ALIGN_AUTO, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
-
-    lv_obj_add_event_cb(ui_textwifissid,textarea_event, LV_EVENT_FOCUSED, NULL);
-		lv_textarea_set_text(ui_textwifissid,guiconf_global.wifi_ssid);
-    // ui_textwifipassword
-
-    ui_textwifipassword = lv_textarea_create(ui_rightpanelwifi);
-
-    lv_obj_set_width(ui_textwifipassword, 300);
-    lv_obj_set_height(ui_textwifipassword, 40);
-
-    lv_obj_set_x(ui_textwifipassword, 13);
-    lv_obj_set_y(ui_textwifipassword, -106);
-
-    lv_obj_set_align(ui_textwifipassword, LV_ALIGN_CENTER);
-
-    // if("" == "") lv_textarea_set_accepted_chars(ui_textwifipassword, NULL);
-    // else lv_textarea_set_accepted_chars(ui_textwifipassword, "");
-
-    lv_textarea_set_text(ui_textwifipassword, "");
-    lv_textarea_set_placeholder_text(ui_textwifipassword, "Your wifi password");
-    //密码 可见时间可以通过 lv_conf.h 中的 LV_TEXTAREA_DEF_PWD_SHOW_TIME  进行调整
-    lv_textarea_set_password_mode(ui_textwifipassword, true);  // 密码模式
-    lv_obj_clear_flag(ui_textwifipassword,
-                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
-                      
-    lv_obj_set_style_text_color(ui_textwifipassword, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_textwifipassword, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(ui_textwifipassword, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_textwifipassword, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_textwifipassword, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_textwifipassword, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    
-    lv_obj_set_style_text_color(ui_textwifipassword, lv_color_hex(0xFF0000), LV_STATE_FOCUSED | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_textwifipassword, 255, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_textwifipassword, LV_TEXT_ALIGN_AUTO, LV_STATE_FOCUSED | LV_STATE_DEFAULT);
-
-    lv_obj_add_event_cb(ui_textwifipassword,textarea_event, LV_EVENT_FOCUSED, NULL);
-		lv_textarea_set_text(ui_textwifipassword,guiconf_global.wifi_passwd);
     // ui_Keyboard2
 
-    ui_Keyboard2 = lv_keyboard_create(ui_rightpanelwifi);
-
-    lv_obj_set_width(ui_Keyboard2, 480);
-    lv_obj_set_height(ui_Keyboard2, 200);
-
-    lv_obj_set_x(ui_Keyboard2, 0);
-    lv_obj_set_y(ui_Keyboard2, 100);
-
-    lv_obj_set_align(ui_Keyboard2, LV_ALIGN_CENTER);
-
+    ui_Keyboard2 = lv_keyboard_create(ui_ScreenPage);
+	  lv_obj_add_flag(ui_Keyboard2, LV_OBJ_FLAG_HIDDEN);
     // POST CALLS
     lv_keyboard_set_textarea(ui_Keyboard2, ui_textwifissid);
+//		lv_obj_add_event_cb(ui_Keyboard2, kb_event_cb, LV_EVENT_ALL, NULL);
+
+
 
 
 
@@ -701,4 +821,6 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
 		lv_obj_align_to(bg_img_set_dd,desktop_bg_set_label, LV_ALIGN_OUT_RIGHT_BOTTOM, 0, 0);
     lv_obj_add_event_cb(bg_img_set_dd, desktop_bg_img_dd_event_handler, LV_EVENT_ALL, NULL);
 
+
+		
 }

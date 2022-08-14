@@ -86,11 +86,33 @@ void guiconf_read(guiconf_t *guiconf)
 	rt_strcpy(guiconf->apikey,item->valuestring);
 	LOG_I("read guiconf apikey:%s\n",item->valuestring);
 
+	// get cityname
+	item = cJSON_GetObjectItem(root,"cityname");
+	if(item)
+	{
+		rt_memset(guiconf->cityname,0,CONF_STR_MAX_LEN);
+		rt_strcpy(guiconf->cityname,item->valuestring);
+		LOG_I("read guiconf cityname:%s\n",item->valuestring);
+	}
+	else
+	{
+		LOG_E("not found cityname conf\n");
+	}
+
+	
 	// get cityid
 	item = cJSON_GetObjectItem(root,"cityid");
-	rt_memset(guiconf->cityid,0,CONF_STR_MIN_LEN);
-	rt_strcpy(guiconf->cityid,item->valuestring);
-	LOG_I("read guiconf cityid:%s\n",item->valuestring);
+	if(item)
+	{
+		rt_memset(guiconf->cityid,0,CONF_STR_MIN_LEN);
+		rt_strcpy(guiconf->cityid,item->valuestring);
+		LOG_I("read guiconf cityid:%s\n",item->valuestring);
+	}
+	else
+	{
+		LOG_E("not found cityid conf\n");
+	}
+
 	
 	guiconf->valid =1;
 	
@@ -120,10 +142,11 @@ void guiconf_print(guiconf_t *guiconf)
 	}
 	if(guiconf->valid ==1)
 	{
-		LOG_I("ssid :%s",guiconf->wifi_ssid);
+		LOG_I("ssid        :%s",guiconf->wifi_ssid);
 		LOG_I("wifi_passwd :%s",guiconf->wifi_passwd);
-		LOG_I("apikey :%s",guiconf->apikey);
-		LOG_I("cityid :%s",guiconf->cityid);
+		LOG_I("apikey      :%s",guiconf->apikey);
+		LOG_I("cityname    :%s",guiconf->cityname);
+		LOG_I("cityid      :%s",guiconf->cityid);
 	}
 	else
 	{
@@ -155,6 +178,17 @@ void guiconf_set_wifipasswd(guiconf_t *guiconf,const char *wifipasswd)
 		rt_strcpy(guiconf->wifi_passwd,wifipasswd);
 }
 
+void guiconf_set_cityname(guiconf_t *guiconf,const char *cityname)
+{
+		if(guiconf ==RT_NULL && cityname == RT_NULL)
+		{
+			return ;
+		}
+		rt_memset(guiconf->cityname,0,CONF_STR_MAX_LEN);
+		rt_strcpy(guiconf->cityname,cityname);
+}
+
+
 void guiconf_set_cityid(guiconf_t *guiconf,const char *cityid)
 {
 		if(guiconf ==RT_NULL && cityid == RT_NULL)
@@ -164,6 +198,8 @@ void guiconf_set_cityid(guiconf_t *guiconf,const char *cityid)
 		rt_memset(guiconf->cityid,0,CONF_STR_MIN_LEN);
 		rt_strcpy(guiconf->cityid,cityid);
 }
+
+
 
 
 
@@ -218,8 +254,10 @@ void guiconf_write(guiconf_t *guiconf)
 	
 	cJSON_AddStringToObject(root,"apikey",guiconf->apikey);
 	
+	cJSON_AddStringToObject(root,"cityname",guiconf->cityname);
+	
 	cJSON_AddStringToObject(root,"cityid",guiconf->cityid);
-    cjsonstr =  cJSON_Print(root);
+	cjsonstr =  cJSON_Print(root);
     
     LOG_I("cjson str : %s \n",cjsonstr);
 

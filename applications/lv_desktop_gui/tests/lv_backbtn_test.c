@@ -603,7 +603,7 @@ void desktop_img_switch(const char *imgsrc)
 			lv_anim_set_var(&a2, desktop_imgshow);
 			lv_anim_set_exec_cb(&a2, img_opa_anim_cb);
 			lv_anim_set_values(&a2, 0, 255);
-			lv_anim_set_delay(&a2,1000);
+			lv_anim_set_delay(&a2,0);
 			lv_anim_set_time(&a2, 1000);
 			lv_anim_set_playback_delay(&a2, 10000);
 			lv_anim_set_playback_time(&a2, 1000);

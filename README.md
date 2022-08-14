@@ -16,6 +16,9 @@
 
   本次比赛，我申请的是 STM32F469-Discovery 开发板，感谢RT-Thread 提供硬件支持。
 
+## 演示视频
+[B站视频链接](https://www.bilibili.com/video/BV1aN4y1G7Ua)
+
 ## 硬件说明
 
 - STM32F469-Discovery
@@ -28,6 +31,10 @@
 
 - ESP32-Arduino 
 	- 板载 ESP32-WROVER 模组
+
+
+## 软件开发环境说明
+  本工程使用 MDK5构建，rt-thread 的配置使用 env工具构建。
 
 ## SD卡存储目录说明
 
@@ -81,17 +88,20 @@ minimgs             <DIR>  // 小图片 存放 240*320 像素图片
 ### 基础功能构建
 
 #### STM32 FLASH 分散加载
+  这款开发板上的STM32内置有 2MB 的 flash，正常开发单片机的程序绝对是够用了，但是由于本次设计是针对GUI的，需要引入非常多的图片资源，这样的话，2MB 的 flash 空间就显得有点小了，好在开发板上面还板载了一颗 16MB 大小的 QSPI FLASH,这样的话，就要想办法将这个外部的FLASH 使用起来。
+  STM32 的芯片大都提供有 FLASH 分散加载功能，意思就是能够同时将生成的bin文件拆开，分门别类的存放到不同的 FLASH 空间中。在这里，我们就使用到了 FLASH 分散加载算法来将一些较大的必备图片数据保存到外部FLASH 中。
 
 #### LVGL 性能优化
 
 #### LVGL 对接 FS
 
 #### 使能 UART6
+  rt-thread 针对 stm32f469-discovery 开发板提供的bsp中没有开启 UART6,由于本次设计中要使用UART6和ESP32 进行串口通信，实现网络功能，因此需要在STM32 HAL 驱动中使能 UART6.
 
 #### ESP32 联网
 
 #### 获取网络数据
-
+  使用 wget 获取网络数据。
 
 ### 界面设计
 
