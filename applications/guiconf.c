@@ -10,7 +10,7 @@
 
 
 #define GUICONFIG_FILENAME "/conf/gui.conf"
-
+#define GUICONFIG_FILENAMEBAK "/conf/gui.conf.bak"
 
 // gui 全局配置
 guiconf_t guiconf_global;
@@ -170,7 +170,8 @@ void guiconf_set_cityid(guiconf_t *guiconf,const char *cityid)
 void guiconf_write(guiconf_t *guiconf)
 {
 	static cJSON *root = RT_NULL;
-    char *cjsonstr=RT_NULL;
+	char *cjsonstr=RT_NULL;
+	struct stat file_stat;
 	int fd=0;
 	int ret=0;
 
@@ -179,8 +180,37 @@ void guiconf_write(guiconf_t *guiconf)
 	//LOG_I("wifi_passwd :%s",guiconf->wifi_passwd);
 	//LOG_I("apikey :%s",guiconf->apikey);
  
-
-    root = cJSON_CreateObject();
+	
+	ret = stat(GUICONFIG_FILENAMEBAK, &file_stat);
+	if(ret == 0)
+	{
+		rt_kprintf("%s file size = %d\n", GUICONFIG_FILENAMEBAK,file_stat.st_size);
+		ret = unlink(GUICONFIG_FILENAMEBAK);
+		if(ret ==0)
+		{
+			rt_kprintf("%s file delete success\n", GUICONFIG_FILENAMEBAK);
+		}
+		else
+		{
+			rt_kprintf("%s file delete failed. return \n", GUICONFIG_FILENAMEBAK);
+			return ;
+		}
+	}
+	else
+	{
+		rt_kprintf("%s file not fonud\n",GUICONFIG_FILENAMEBAK);
+		
+	}
+	
+	ret =rename(GUICONFIG_FILENAME, GUICONFIG_FILENAMEBAK);
+	if(ret<0)
+	{
+		LOG_E("rename file %s to %s error. return ", GUICONFIG_FILENAME,GUICONFIG_FILENAMEBAK);
+		return ;
+	}
+	
+	
+	root = cJSON_CreateObject();
 
 	cJSON_AddStringToObject(root,"ssid",guiconf->wifi_ssid);
 
@@ -194,7 +224,9 @@ void guiconf_write(guiconf_t *guiconf)
     LOG_I("cjson str : %s \n",cjsonstr);
 
 
-    fd = open(GUICONFIG_FILENAME, O_WRONLY , 0);
+		// O_CREAT 如果要打开的文件不存在，则建立该文件
+		// O_TRUNC 如果文件已经存在，则清空文件中的内容
+    fd = open(GUICONFIG_FILENAME, O_WRONLY|O_CREAT|O_TRUNC , 0);
 	if (fd < 0)
 	{
 			LOG_E("open file failed, open file(%s) error.", GUICONFIG_FILENAME);

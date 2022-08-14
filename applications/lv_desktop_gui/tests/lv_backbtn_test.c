@@ -15,19 +15,8 @@ LV_FONT_DECLARE(HarmonyOS_Sans_SC_Medium);
 //LV_FONT_DECLARE(MontserratMediumNumber120);
 LV_FONT_DECLARE(SiYuanRouHeiDengKuanBan120);
 
-//LV_FONT_DECLARE(digitalclock);
-
-#if 1
-LV_IMG_DECLARE(bg_lvgl);
-#endif
-
 #define LV_BACKBTN_SIZE 64
 #define LV_MENU_BTN_SIZE 32
-
-
-// 自定义 SYMBOL
-// #define USR_SYMBOL_WEATHER "\xEE\xA2\xAE"
-
 
 
 // 定义桌面图标结构体
@@ -117,7 +106,7 @@ static lv_style_transition_dsc_t btntrans;
 static void lv_menu_style_init(void);
 
 
-// 
+static lv_obj_t * bg_img ;
 static lv_obj_t *time_label;
 
 
@@ -132,6 +121,28 @@ static void lv_desktop_img_show_create(lv_obj_t *parent);
 static void lv_desktop_bottom_menu_create(lv_obj_t *parent);
 
 
+// 设置桌面背景
+void lv_desktop_set_bg_img(int imgnum)
+{
+	if(bg_img)
+	{
+		switch(imgnum)
+		{
+			case 0:
+				lv_img_set_src(bg_img, &bg_lvgl);
+				break;
+			case 1:
+				lv_img_set_src(bg_img, &ui_img_testbg_png);
+				break;
+			case 2:
+				lv_img_set_src(bg_img, &ui_img_seaandsky800_png);
+				break;
+			default:
+				lv_img_set_src(bg_img, &bg_lvgl);
+				break;
+		}
+	}
+}
 
 
 // 桌面悬浮球测试函数
@@ -158,7 +169,7 @@ void lv_desktop_backbtn_test(lv_obj_t * page)
     // 设置图片背景
     // 使用 c 数组设置
 
-    lv_obj_t * bg_img = lv_img_create(desktop);
+    bg_img = lv_img_create(desktop);
 //  lv_img_set_src(bg_img, &bg_lvgl);
 		lv_img_set_src(bg_img, &ui_img_testbg_png);
 		lv_obj_align(bg_img, LV_ALIGN_CENTER, 0, 0);

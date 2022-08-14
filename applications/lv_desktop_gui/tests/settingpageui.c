@@ -1,5 +1,5 @@
 #include "settingpageui.h"
-
+#include "lv_backbtn_test.h"
 #include "guiconf.h"
 
 extern void esp32_device_reset_wifi_info();
@@ -52,6 +52,37 @@ static lv_obj_t * system_version_label;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
+
+
+
+
+
+static void desktop_bg_img_dd_event_handler(lv_event_t * e)
+{
+		int select_id;
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        char buf[32];
+        lv_dropdown_get_selected_str(obj, buf, sizeof(buf));
+        LV_LOG_USER("Option: %s", buf);
+				select_id= lv_dropdown_get_selected(obj);
+				lv_desktop_set_bg_img(select_id);
+    }
+}
+
+
+//static void desktop_bg_img_roller_event_handler(lv_event_t * e)
+//{
+//    lv_event_code_t code = lv_event_get_code(e);
+//    lv_obj_t * obj = lv_event_get_target(e);
+//    if(code == LV_EVENT_VALUE_CHANGED) {
+//        char buf[32];
+//        lv_roller_get_selected_str(obj, buf, sizeof(buf));
+//        LV_LOG_USER("Selected value: %s", buf);
+//    }
+//}
+
 
 // roller 选择页面事件
 
@@ -628,4 +659,46 @@ void ui_settingpage_screen_init(lv_obj_t *parent)
 		lv_obj_align_to(cpu_label,system_version_label,LV_ALIGN_OUT_BOTTOM_MID,0,0);
 		lv_label_set_text(cpu_label,"MCU: STM32F469NIH6U");
 		
+		lv_obj_t * desktop_bg_set_label = lv_label_create(ui_rightpanelsystempage);
+		lv_obj_set_width(desktop_bg_set_label, 120);
+    lv_obj_set_height(desktop_bg_set_label, 30);
+		lv_obj_set_style_text_font(desktop_bg_set_label, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+		lv_obj_align_to(desktop_bg_set_label,cpu_label,LV_ALIGN_OUT_BOTTOM_LEFT,0,5);
+		lv_label_set_text(desktop_bg_set_label,"桌面背景:");
+		
+		
+		// 桌面背景样式设置滚轮
+		/*A style to make the selected option larger*/
+//    static lv_style_t style_sel;
+//    lv_style_init(&style_sel);
+//    lv_style_set_text_font(&style_sel, &HarmonyOS_Sans_SC_Medium);
+
+//    const char * opts = "样式1\n样式2\n样式3";
+//    lv_obj_t *bg_img_set_roller;
+
+//    /*A roller on the left with left aligned text, and custom width*/
+//    bg_img_set_roller = lv_roller_create(ui_rightpanelsystempage);
+//    lv_roller_set_options(bg_img_set_roller, opts, LV_ROLLER_MODE_NORMAL);
+//    lv_roller_set_visible_row_count(bg_img_set_roller, 2);
+//    lv_obj_set_width(bg_img_set_roller, 150);
+//    lv_obj_add_style(bg_img_set_roller, &style_sel, LV_PART_SELECTED);
+//    lv_obj_set_style_text_align(bg_img_set_roller, LV_TEXT_ALIGN_LEFT, 0);
+//    lv_obj_align_to(bg_img_set_roller,desktop_bg_set_label, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+//    lv_obj_add_event_cb(bg_img_set_roller, desktop_bg_img_roller_event_handler, LV_EVENT_ALL, NULL);
+//    lv_roller_set_selected(bg_img_set_roller, 0, LV_ANIM_OFF);
+
+
+    lv_obj_t * bg_img_set_dd = lv_dropdown_create(ui_rightpanelsystempage);
+		lv_obj_set_style_text_font(bg_img_set_dd, &HarmonyOS_Sans_SC_Medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_dropdown_set_options_static(bg_img_set_dd, "样式1\n"
+                                "样式2\n"
+                                "样式3");
+		lv_dropdown_set_dir(bg_img_set_dd, LV_DIR_BOTTOM);
+		lv_dropdown_set_symbol(bg_img_set_dd, LV_SYMBOL_DOWN);
+		lv_dropdown_set_selected(bg_img_set_dd,0);
+		lv_obj_align_to(bg_img_set_dd,desktop_bg_set_label, LV_ALIGN_OUT_RIGHT_BOTTOM, 0, 0);
+    lv_obj_add_event_cb(bg_img_set_dd, desktop_bg_img_dd_event_handler, LV_EVENT_ALL, NULL);
+
 }

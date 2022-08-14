@@ -20,6 +20,10 @@ struct desktop_menubtn_s
 
 typedef struct desktop_menubtn_s desktop_menubtn_t;
 
+
+
+void lv_desktop_set_bg_img(int imgnum);  // 设置桌面背景
+
 void lv_desktop_top_symbol_create(lv_obj_t* parent);
 void lv_desktop_backbtn_create(lv_obj_t * parent);
 void lv_backbtn_event_cb(lv_event_t * e);
