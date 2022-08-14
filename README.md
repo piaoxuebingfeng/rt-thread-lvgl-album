@@ -17,6 +17,8 @@
   本次比赛，我申请的是 STM32F469-Discovery 开发板，感谢RT-Thread 提供硬件支持。
 
 ## 演示视频
+  视频和图片说明： 由于仓库代码还在不断更新，演示界面和实际的功能可能有所区别。
+
 [B站视频链接](https://www.bilibili.com/video/BV1aN4y1G7Ua)
 
 ## 硬件说明
@@ -60,9 +62,11 @@ minimgs             <DIR>  // 小图片 存放 240*320 像素图片
         "ssid": "wifissid",
         "passwd":       "1234567890",
         "apikey":       "********************************",
+		"cityname":"zhengzhou",
         "cityid":       "101180101"
 }
 ```
+  项目中实现了配置文件的读写功能，可以对系统配置参数进行修改设置。
 
 ## 功能设计
 
@@ -92,9 +96,23 @@ minimgs             <DIR>  // 小图片 存放 240*320 像素图片
   STM32 的芯片大都提供有 FLASH 分散加载功能，意思就是能够同时将生成的bin文件拆开，分门别类的存放到不同的 FLASH 空间中。在这里，我们就使用到了 FLASH 分散加载算法来将一些较大的必备图片数据保存到外部FLASH 中。
 
 #### LVGL 性能优化
+  LVGL 性能优化部分这里只是简单进行了优化，主要是扩大了 LVGL 的 framebuffer,利用LVGL 的双缓冲区，并利用了外置的SRAM区域。具体实现在 `applications/lvgl/lv_port_disp.c` 中。
 
+```
+#define LV_DISP_SRAM_START_ADDR (0xC0000000 + 10*1024*1024)
+
+#define DISP_BUF_SIZE        (LV_HOR_RES_MAX * LV_VER_RES_MAX )
+static lv_color_t  lv_disp_buf1[DISP_BUF_SIZE] __attribute__((at(LV_DISP_SRAM_START_ADDR+DISP_BUF_SIZE*2)))={0};
+static lv_color_t  lv_disp_buf2[DISP_BUF_SIZE] __attribute__((at(LV_DISP_SRAM_START_ADDR+DISP_BUF_SIZE*4)))={0};
+
+```
+  此外，还在`lv_conf.h`中设置了LVGL 的刷新周期。
+```
+#define LV_DISP_DEF_REFR_PERIOD 20
+
+```
 #### LVGL 对接 FS
-
+  rt-thread 官方提供的 LVGL 还没有对接 FS,由于本次设计中需要加载外部图片，因此需要LVGL对接FS的功能。RT-Thread提供了 DFS 虚拟文件系统标准接口，因此本项目中我们直接对接DFS提供的接口。具体的实现请参考 `applications/lvgl/lv_port_fs.c`
 #### 使能 UART6
   rt-thread 针对 stm32f469-discovery 开发板提供的bsp中没有开启 UART6,由于本次设计中要使用UART6和ESP32 进行串口通信，实现网络功能，因此需要在STM32 HAL 驱动中使能 UART6.
 
@@ -103,7 +121,9 @@ minimgs             <DIR>  // 小图片 存放 240*320 像素图片
 #### 获取网络数据
   使用 wget 获取网络数据。
 
+
 ### 界面设计
+  界面设计相关的代码主要在 `applications/lv_desktop_gui/` 目录下。详细的代码请查看相关源码。这里介绍下每一个界面的主要功能。
 
 #### 主界面设计
   主界面主要实现了相册轮播、时间显示和应用切换功能。
@@ -141,10 +161,25 @@ minimgs             <DIR>  // 小图片 存放 240*320 像素图片
 #### 自定义控件
 
 ##### 自定义日出日落显示控件
-##### 自定义日历控件
+  日出日落控件是利用 lv_canvas 组件编写出来的，目前能够支持显示日出日落时间，以及显示当前太阳的位置。
 
+##### 自定义日历控件
+  LVGL8.2 中自带的日历控件已经取消了修改样式相关API,而默认的 LVGL的日历控件的样式又不太好看，因此，笔者通过修改日历控件的源码，添加了一些样式支持，并且封装了以下日历控件，增加了对农历日期显示的支持，就形成了目前UI设计中的日历。
 
 ### 网络通信
+
+#### 数据接口 API
+  本次设计中使用到了几个网站的数据接口。
+##### 新闻数据接口
+
+  新闻数据是通过天行数据API获取的相关接口为`http://api.tianapi.com/bulletin/index?key=APIKEY`,APIKEY需要用户自行申请，并添加到`/conf/gui.conf`配置文件中。
+  新闻数据接口返回的数据格式是 JSON 数据格式。
+
+
+##### 天气数据接口
+  天气数据接口使用的是`sojson.com`提供的一个免费的天气API接口，不需要使用APIKEY就能够获取国内15天的城市天气信息，`http://t.weather.sojson.com/api/weather/city/cityid`，其中 cityid 是城市id。
+  天气数据接口返回的数据格式同样是 JSON格式。
+
 
 ### 系统配置
 
@@ -153,9 +188,32 @@ minimgs             <DIR>  // 小图片 存放 240*320 像素图片
 ### 问题解决
 
 #### 解决 ESP32 AT-Device 组件解析DNS失败问题
+  一开始调试 ESP32 的 AT-Device 组件，发现WIFI能够正常连接，但是每次HTTP请求总是异常。经过一番排查，发现是 esp32 的 dns 解析功能异常导致的，修改了 at-device 组件的代码之后，问题解决。具体修改的文件为`at_device/class/esp32/at_device_esp32.c`主要修改的内容相关patch如下：
+
+```
+---
+ class/esp32/at_device_esp32.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/class/esp32/at_device_esp32.c b/class/esp32/at_device_esp32.c
+index 1d57ebe..1f2424f 100644
+--- a/class/esp32/at_device_esp32.c
++++ b/class/esp32/at_device_esp32.c
+@@ -304,7 +304,7 @@ static int esp32_netdev_set_dns_server(struct netdev *netdev, uint8_t dns_num, i
+     }
+ 
+     /* send dns server set commond "AT+CIPDNS_CUR=<enable>[,<DNS    server0>,<DNS   server1>]" and wait response */
+-    if (at_obj_exec_cmd(device->client, resp, "AT+CIPDNS_CUR=1,\"%s\"", inet_ntoa(*dns_server)) < 0)
++    if (at_obj_exec_cmd(device->client, resp, "AT+CIPDNS=1,\"%s\"", inet_ntoa(*dns_server)) < 0)
+     {
+         LOG_E("%s device set DNS failed.", device->name);
+         result = -RT_ERROR;
+-- 
+```
 
 #### 解决 STM32-Discovery 开发板触摸驱动无法正常工作问题
-
+  该问题主要是由于笔者拿到的开发板上面的触摸屏驱动IC导致的，目前已知的是该款开发板上面的驱动IC有两款，一款是 FT6206 ，另外一款就是笔者目前拿到的 FT6336G,由于bsp包中没有做兼容性的验证，导致电容触摸驱动工作不正常。
+  经过和社区的人员沟通，目前该问题已经解决，并且相关修改已经合并到bsp中。
 
 
 ## 参考设计
