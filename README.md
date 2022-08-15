@@ -116,10 +116,17 @@ static lv_color_t  lv_disp_buf2[DISP_BUF_SIZE] __attribute__((at(LV_DISP_SRAM_ST
 #### 使能 UART6
   rt-thread 针对 stm32f469-discovery 开发板提供的bsp中没有开启 UART6,由于本次设计中要使用UART6和ESP32 进行串口通信，实现网络功能，因此需要在STM32 HAL 驱动中使能 UART6.
 
+
+
 #### ESP32 联网
 
+  rt-thread 提供了at-device 和 at-socket 组件，可以非常方便的使用一些由AT指令集来进行通信的网络模块，ESP32也是被支持的模块之一。有了 at-device，就不需要开发者单独编写适配各个网络模块的AT命令收发的程序了。有了at-socket，开发者还能使用非常熟悉的网络套接字 socket 编程的方式来编写和网络连接相关的程序。
+
+  rt-thread 提供的这套网络通信组件大大降低了在单片机中开发网络应用的门槛，非常易用。
+
 #### 获取网络数据
-  使用 wget 获取网络数据。
+
+  rt-thread 中提供了 webclient 软件包，使用该软件包可以非常容易的实现 HTTP 报文的收发，同时该软件包还提供有 wget 命令，类似于 linux 中的 wget ，也是可以非常方便的测试 http 报文收发功能。
 
 
 ### 界面设计
@@ -151,7 +158,7 @@ static lv_color_t  lv_disp_buf2[DISP_BUF_SIZE] __attribute__((at(LV_DISP_SRAM_ST
 ![img2.jpg](docs/img2.jpg)
 
 #### 游戏界面
-  游戏界面实现了 2048 游戏，2048 游戏主要是移植于 10ask 开源的LVGL lib库。
+  游戏界面实现了 2048 游戏，2048 游戏主要是移植于 100ask 开源的 lv_lib_100ask 库。
 ![img4.jpg](docs/img4.jpg)
 
 #### 系统配置界面
@@ -180,10 +187,9 @@ static lv_color_t  lv_disp_buf2[DISP_BUF_SIZE] __attribute__((at(LV_DISP_SRAM_ST
   天气数据接口使用的是`sojson.com`提供的一个免费的天气API接口，不需要使用APIKEY就能够获取国内15天的城市天气信息，`http://t.weather.sojson.com/api/weather/city/cityid`，其中 cityid 是城市id。
   天气数据接口返回的数据格式同样是 JSON格式。
 
-
 ### 系统配置
 
-### 实用功能
+​    系统配置界面主要实现对系统WIFI网络配置、城市配置、系统版本查看、桌面背景样式切换等功能。
 
 ### 问题解决
 
@@ -218,10 +224,20 @@ index 1d57ebe..1f2424f 100644
 
 ## 参考设计
 
+[lv_lib_100ask](https://gitee.com/weidongshan/lv_lib_100ask)
 
 ## 感谢
+
   经过一个多月的编码测试，基于STM32F469-Discovery 的桌面相册也算是有了一个V1.0的版本了。由于工作的原因，作者的本职工作不再是从事RTOS的开发，但是仍然对嵌入式RTOS充满着兴趣，只能在业余抽时间来学习研究。截止到目前为止，RT-Thread 嵌入式实时操作系统仍然是一个面向IOT领域屈指可数的优秀系统，而且社区目前还非常的活跃，引入的软件包也都相当易用。使用 RT-Thread 能够大大减少开发人员的框架搭建工作，专注于业务开发和功能实现。非常感谢RT-Thread 团队开发出这么优秀的IOT 操作系统，小巧、易用而又功能强大。
-  
+
   在比赛作品实现过程中，都是抽取下班和周末的时间来参与本次比赛，过程中没有太多时间做家务、带娃。在此也非常感谢我的老婆和父母，是他们在默默的支持着我搞自己的兴趣爱好，也在默默的为家庭付出着。
-  
+
   本次比赛作品虽然是有截止时间限制，但是我不想就这么停止目前的开发工作，现在的版本也只是V1.0版本，还有部分性能方面的问题和易用性方面的问题没能得到解决。借助本次比赛，RT-Thread 团队从全世界各地帮忙搜集开发板，并提供给我们这些开发者和爱好者，非常感谢RT-Thread 的大力支持，我还会基于开发板，抽时间来完善这个作品。
+
+
+
+
+
+## 有待完善的内容
+
+  由于本次开发时间进度，还有很多地方有待优化和完善的，因此，后续会针对该项目进行针对性的优化和迭代。
