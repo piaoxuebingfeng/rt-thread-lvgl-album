@@ -1,6 +1,8 @@
 # 基于 RT-Thread 和 LVGL 设计的桌面电子相册
 
 
+**中文** | [English](README_en.md) 
+
 ## 比赛说明
 
   本仓库代码主要用于参加RT-Thread 社区举办的嵌入式GUI挑战赛，比赛链接如下：
